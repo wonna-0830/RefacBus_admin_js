@@ -11,9 +11,39 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [isKoreanId, setIsKoreanId] = useState(false);
+  const [isEnglishName, setIsEnglishName] = useState(false);
   const navigate = useNavigate();
 
   const auth = getAuth(app);
+
+  const handlePasswordToggle = () => {
+  setShowPassword(true);
+  setTimeout(() => setShowPassword(false), 3000);
+  };
+
+  const handleCodeToggle = () => {
+    setShowCode(true);
+    setTimeout(() => setShowCode(false), 3000);
+  };
+
+  const handleIdChange = (e) => {
+    const value = e.target.value;
+    setId(value);
+
+    const koreanRegex = /[ㄱ-ㅎㅏ-ㅣ가-힣]/;
+    setIsKoreanId(koreanRegex.test(value));
+  };
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+
+    const englishRegex = /[a-zA-Z]/;
+    setIsEnglishName(englishRegex.test(value));
+  };
 
   const handleRegister = async () => {
     if (!id || !password || !name || !code) {
@@ -56,10 +86,16 @@ export default function Register() {
       alert("회원가입 성공!");
       navigate("/");
     } catch (error) {
-      console.error("회원가입 실패:", error.message);
-      alert("회원가입 중 오류 발생: " + error.message);
+        if (error.code === "auth/email-already-in-use") {
+        setErrorMessage("이미 등록된 이메일입니다. 로그인하거나 다른 이메일을 사용해주세요.");
+      } else if (error.code === "auth/invalid-email") {
+        setErrorMessage("이메일 형식이 올바르지 않습니다.");
+      } else if (error.code === "auth/weak-password") {
+        setErrorMessage("비밀번호는 최소 6자리 이상이어야 합니다.");
+      } else {
+        setErrorMessage("회원가입 중 오류가 발생했습니다.");
+      }
     }
-    
   };
 
   return (
@@ -72,32 +108,73 @@ export default function Register() {
 
         <input
           type="text"
-          placeholder="아이디 (예: admin01)"
-          className="w-full mb-4 p-2 border rounded"
+          placeholder="아이디 (영문 입력)"
           value={id}
-          onChange={(e) => setId(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
+          onChange={handleIdChange}
           className="w-full mb-4 p-2 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
         />
+        {isKoreanId && (
+          <p className="text-red-500 text-sm mb-3">
+            한글입니다. 영문으로 작성해주세요.
+          </p>
+        )}
+
+
+        <div style={{ position: "relative" }}>
+            <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                className="w-full mb-4 p-2 border rounded"
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호"
+            />
+            <button
+                type="button"
+                onClick={handlePasswordToggle}
+                style={{
+                position: "absolute",
+                right: "10px",
+                top: "35%",
+                transform: "translateY(-50%)"
+                }}
+            >
+                👁
+            </button>
+        </div>
         <input
-          type="text"
-          placeholder="성명"
-          className="w-full mb-4 p-2 border rounded"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="관리자 코드"
-          className="w-full mb-4 p-2 border rounded"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
+            type="text"
+            placeholder="이름 (한글 입력)"
+            value={name}
+            onChange={handleNameChange}
+            className="w-full mb-4 p-2 border rounded"
+          />
+          {isEnglishName && (
+            <p className="text-red-500 text-sm mb-3">
+              영문입니다. 한글로 작성해주세요.
+            </p>
+          )}
+
+        <div style={{ position: "relative" }}>
+            <input
+                type={showCode ? "text" : "password"}
+                value={code}
+                className="w-full mb-4 p-2 border rounded"
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="관리자 코드"
+            />
+            <button
+                type="button"
+                onClick={handleCodeToggle}
+                style={{
+                position: "absolute",
+                right: "10px",
+                top: "35%",
+                transform: "translateY(-50%)"
+                }}
+            >
+                👁
+            </button>
+        </div>
 
         <button
           onClick={handleRegister}
