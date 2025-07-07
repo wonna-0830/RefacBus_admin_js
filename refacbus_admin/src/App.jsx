@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from "./pages/Login"
 import Home from "./pages/Home"
 import Register from "./pages/Register"
+import UserManagement from './pages/UserManagement';
+import PlaceTimeManagement from './pages/PlaceTimeManagement';
+import ReservationManagement from './pages/ReservationManagement';
+import DriverManagement from './pages/DriverManagement.jsx';
+import ManagerManagement from './pages/ManagerManagement.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,6 +21,11 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/Register" element={<Register />}/>
         <Route path="/Home" element={<Home />} />
+        <Route path="/user-management" element={<UserManagement />} />
+        <Route path="/placetime-management" element={<PlaceTimeManagement />} />
+        <Route path="/reservation-management" element={<ReservationManagement />} />
+        <Route path="/driver-management" element={<DriverManagement />} />
+        <Route path="/manager-management" element={<ManagerManagement />} />
       </Routes>
     </BrowserRouter>
   )
