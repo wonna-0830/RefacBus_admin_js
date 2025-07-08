@@ -22,7 +22,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-getAnalytics(app); // analytics는 사용 안해도 되지만 있어도 괜찮아
+getAnalytics(app); 
 
 // 필요한 기능 export
 export const auth = getAuth(app);

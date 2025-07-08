@@ -11,6 +11,7 @@ import PlaceTimeManagement from './pages/PlaceTimeManagement';
 import ReservationManagement from './pages/ReservationManagement';
 import DriverManagement from './pages/DriverManagement.jsx';
 import ManagerManagement from './pages/ManagerManagement.jsx';
+import DashBoard from './pages/DashBoard.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,6 +27,7 @@ function App() {
         <Route path="/reservation-management" element={<ReservationManagement />} />
         <Route path="/driver-management" element={<DriverManagement />} />
         <Route path="/manager-management" element={<ManagerManagement />} />
+        <Route path="/dashboard" element={<DashBoard />} />
       </Routes>
     </BrowserRouter>
   )
