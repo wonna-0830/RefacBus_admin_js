@@ -35,7 +35,13 @@ const Sidebar = ({ onMenuSelect }) => {
       variant="permanent"
       anchor="left"
     >
-      <Toolbar>
+      <Toolbar
+        onClick={() => onMenuSelect('home')}
+        sx={{
+          cursor: 'pointer',
+          '&:hover': { opacity: 0.8 },
+        }}
+      >
         <Typography variant="h6" noWrap component="div">
           DCU 스쿨버스 관리자
         </Typography>

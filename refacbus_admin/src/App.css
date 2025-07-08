@@ -17,6 +17,11 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
+.custom-calendar {
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 1.3rem;
+}
 
 @keyframes logo-spin {
   from {

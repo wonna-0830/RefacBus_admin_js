@@ -80,6 +80,12 @@ export default function Login() {
     navigate("/Register");
   };
 
+  const handleKeyDown = (e) => {
+  if (e.key === 'Enter') {
+    handleLogin(); // 엔터 누르면 로그인 함수 실행
+  }
+};
+
   return (
     <div className="max-w-2xl mx-auto p-10">
       <div className="bg-white shadow-md rounded p-9">
@@ -93,6 +99,7 @@ export default function Login() {
           className="w-full mb-4 p-2 border rounded"
           value={id}
           onChange={(e) => setId(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
 
         <div style={{ position: "relative" }}>
@@ -102,6 +109,7 @@ export default function Login() {
                 className="w-full mb-4 p-2 border rounded"
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="비밀번호"
+                onKeyDown={handleKeyDown}
             />
             <button
                 type="button"

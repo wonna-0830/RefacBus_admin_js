@@ -7,12 +7,15 @@ import PlaceTimeManagement from './PlaceTimeManagement';
 import ReservationManagement from './ReservationManagement';
 import DriverManagement from './DriverManagement.jsx';
 import ManagerManagement from './ManagerManagement.jsx';
+import DashBoard from './DashBoard.jsx';
 
 function Home() {
-  const [selectedMenu, setSelectedMenu] = useState('user');
+  const [selectedMenu, setSelectedMenu] = useState('home');
 
   const renderContent = () => {
     switch (selectedMenu) {
+      case 'home':
+        return <DashBoard />;
       case 'user':
         return <UserManagement />;
       case 'placetime':
