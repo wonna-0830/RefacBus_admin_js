@@ -146,7 +146,6 @@ export default function Login() {
             />
           아이디 기억하기
         </label>
-``
       </div>
     </div>
   );
