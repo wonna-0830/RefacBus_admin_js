@@ -41,7 +41,7 @@ const PlaceTimeManagement = () => {
   
     const handleSubmit = () => {
       const newRoute = {
-        name,
+        name: route,
         isPinned,
         date: new Date().toISOString(),
         writer: '관리자',
