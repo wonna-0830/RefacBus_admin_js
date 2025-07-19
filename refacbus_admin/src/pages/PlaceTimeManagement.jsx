@@ -158,12 +158,20 @@ const PlaceTimeManagement = () => {
       
       const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
       const [selectedRouteForStop, setSelectedRouteForStop] = useState(null);
-      const [newStopText, setNewStopText] = useState("");
+      const [openStopEditDialog, setOpenStopEditDialog] = useState(false);
+      const [selectedStopInfo, setSelectedStopInfo] = useState(null);
+      const [editStopText, setEditStopText] = useState('');
+
 
       const handleStopOpen = (event, route) => {
         setSelectedRouteForStop(route);  
         setIsStopDialogOpen(true); 
       };
+
+      const [selectedRouteInfo, setSelectedRouteInfo] = useState(null); // { id, name }
+      const [editRouteText, setEditRouteText] = useState('');
+      const [openRouteDialog, setOpenRouteDialog] = useState(false);
+
 
     
 
@@ -190,7 +198,7 @@ const PlaceTimeManagement = () => {
             minWidth: 'fit-content',  // ← 너무 좁게 붙는 거 방지
           }}
         >
-          <Tab label="노선  추가 / 삭제" />
+          <Tab label="노선 추가 / 삭제" />
           <Tab label="노선 시간대 설정 및 관리" />
           <Tab label="노선 정류장 설정 및 관리" />
         </Tabs>
@@ -207,6 +215,7 @@ const PlaceTimeManagement = () => {
         }}
       >
         <TabPanel value={tabIndex} index={0}>
+          
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -215,6 +224,7 @@ const PlaceTimeManagement = () => {
               >
             새 노선 등록
           </Button>
+          
           
           {/* 팝업 다이얼로그 */}
           <Dialog open={open} onClose={() => setOpen(false)}>
@@ -229,6 +239,7 @@ const PlaceTimeManagement = () => {
                   />
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                  
                   <IconButton onClick={() => setIsPinned(prev => !prev)}>
                     {isPinned ? <StarIcon color="primary" /> : <StarBorderIcon />}
                   </IconButton>
@@ -253,7 +264,12 @@ const PlaceTimeManagement = () => {
                           {routeList.map((item) => (
                             <TableRow key={item.id}>
                               <TableCell>
-                                <a>
+                                <a style={{ cursor: 'pointer' }}
+                                  onClick={() => {
+                                    setSelectedRouteInfo({ id: item.id, name: item.name });
+                                    setEditRouteText(item.name);
+                                    setOpenRouteDialog(true);
+                                  }}>
                                   {item.name}
                                 </a>
                               </TableCell>
@@ -267,6 +283,48 @@ const PlaceTimeManagement = () => {
                           ))}
                         </TableBody>
                       </Table>
+                      <Dialog open={openRouteDialog} onClose={() => setOpenRouteDialog(false)}>
+                        <DialogTitle>노선명 수정 / 삭제</DialogTitle>
+                        <DialogContent>
+                          <TextField
+                            label="노선명"
+                            fullWidth
+                            value={editRouteText}
+                            onChange={(e) => setEditRouteText(e.target.value)}
+                          />
+                        </DialogContent>
+                        <DialogActions>
+                          <Button
+                            color="error"
+                            onClick={async () => {
+                              if (!selectedRouteInfo) return;
+                              // ✅ 삭제 로직 (Firebase에서 삭제, localState에서 제거)
+                              await remove(ref(realtimeDb, `routes/${selectedRouteInfo.id}`));
+                              setRouteList((prev) => prev.filter((r) => r.id !== selectedRouteInfo.id));
+                              setOpenRouteDialog(false);
+                            }}
+                          >
+                            삭제
+                          </Button>
+                          <Button
+                            color="primary"
+                            onClick={async () => {
+                              if (!selectedRouteInfo) return;
+                              // ✅ 수정 로직
+                              await set(ref(realtimeDb, `routes/${selectedRouteInfo.id}/name`), editRouteText);
+                              const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRouteInfo.id}`));
+                              const updatedData = updatedSnapshot.val();
+                              setRouteList((prev) =>
+                                prev.map((r) => r.id === selectedRouteInfo.id ? { ...r, name: updatedData.name } : r)
+                              );
+                              setOpenRouteDialog(false);
+                            }}
+                          >
+                            수정
+                          </Button>
+                        </DialogActions>
+                      </Dialog>
+
                     </TableContainer>
         </TabPanel>
         <TabPanel value={tabIndex} index={1}>
@@ -312,7 +370,8 @@ const PlaceTimeManagement = () => {
                     </TableRow>
                   {openRouteId === route.uid && (
                     <TableRow>
-                      <TableCell colSpan={3}>
+                      <TableCell colSpan={4}>
+                        <Typography sx={{ mb: 1 }}>🚌 시간대 목록</Typography>
                         {route.times
                           ? (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -485,7 +544,13 @@ const PlaceTimeManagement = () => {
                             {Object.entries(route.stops).map(([stopId, stopName]) => (
                               <Box
                                 key={stopId}
+                                onClick={() => {
+                                  setSelectedStopInfo({ routeId: route.uid, stopId, value: stopName });
+                                  setEditStopText(stopName);
+                                  setOpenStopEditDialog(true);
+                                }}
                                 sx={{
+                                  cursor: 'pointer',
                                   width: '19%',
                                   backgroundColor: '#fce4ec',
                                   padding: '8px',
@@ -526,52 +591,72 @@ const PlaceTimeManagement = () => {
               </DialogActions>
             </Dialog>
             
-            <Dialog open={isStopDialogOpen} onClose={() => setIsStopDialogOpen(false)}>
-              <DialogTitle>정류장 추가</DialogTitle>
+            <Dialog open={openStopEditDialog} onClose={() => setOpenStopEditDialog(false)}>
+              <DialogTitle>정류장 수정 / 삭제</DialogTitle>
               <DialogContent>
                 <TextField
                   label="정류장명"
-                  multiline
+                  value={editStopText}
+                  onChange={(e) => setEditStopText(e.target.value)}
                   fullWidth
-                  value={newStopText}
-                  onChange={(e) => setNewStopText(e.target.value)}
                 />
               </DialogContent>
               <DialogActions>
                 <Button
-                  color="primary"
+                  color="error"
                   onClick={async () => {
-                    if (!selectedRouteForStop || !newStopText.trim()) return;
-                    const stopsRef = ref(realtimeDb, `routes/${selectedRouteForStop.uid}/stops`);
-        
-                    await push(stopsRef, newStopText.trim());
+                    if (!selectedStopInfo) return;
+                    const { routeId, stopId } = selectedStopInfo;
+                    await update(ref(realtimeDb, `routes/${routeId}/stops`), { [stopId]: null });
 
-                    // 최신 데이터 가져와서 로컬 상태 갱신
-                    const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRouteForStop.uid}`));
+                    const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
                     const updatedData = updatedSnapshot.val();
 
                     setAllRoutes((prev) =>
                       prev.map((route) =>
-                        route.uid === selectedRouteForStop.uid ? { ...route, stops: updatedData.stops } : route
+                        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
                       )
                     );
                     setFilteredRoutes((prev) =>
                       prev.map((route) =>
-                        route.uid === selectedRouteForStop.uid ? { ...route, stops: updatedData.stops } : route
+                        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
                       )
                     );
 
-                    // 입력값 초기화
-                    setNewStopText("");
-                    setIsStopDialogOpen(false);
+                    setOpenStopEditDialog(false);
                   }}
-                  
                 >
-                  확인
+                  삭제
                 </Button>
-                <Button onClick={() => setIsStopDialogOpen(false)} color="secondary">취소</Button>
+                <Button
+                  color="primary"
+                  onClick={async () => {
+                    if (!selectedStopInfo) return;
+                    const { routeId, stopId } = selectedStopInfo;
+                    await set(ref(realtimeDb, `routes/${routeId}/stops/${stopId}`), editStopText);
+
+                    const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
+                    const updatedData = updatedSnapshot.val();
+
+                    setAllRoutes((prev) =>
+                      prev.map((route) =>
+                        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+                      )
+                    );
+                    setFilteredRoutes((prev) =>
+                      prev.map((route) =>
+                        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+                      )
+                    );
+
+                    setOpenStopEditDialog(false);
+                  }}
+                >
+                  수정
+                </Button>
               </DialogActions>
             </Dialog>
+
 
           </Box>
         </TabPanel>

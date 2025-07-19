@@ -343,13 +343,6 @@ const DriverManagement = () => {
       "16:00", "17:00", "18:00", "19:00",
     ];
 
-    const handleOpenScheduleDialog = (day, time) => {
-      setSelectedDays(day);
-      setSelectedCellTime(time);
-      setIsAddDialogOpen(true);
-      fetchPinnedRoutes();
-    };
-
     
     const handleOpenAddDialog = (user) => {
       setCurrentTargetUser(user);
@@ -618,7 +611,11 @@ const DriverManagement = () => {
                           </TableCell>
                           <TableCell>
                             <IconButton onClick={() => handleOpenSchedule(user)}>
-                              <ExpandMoreIcon />
+                              {expandedDriverUid === user.uid ? (
+                            <ExpandLessIcon />
+                          ) : (
+                            <ExpandMoreIcon />
+                          )}
                             </IconButton>
                           </TableCell>
                         </TableRow>
