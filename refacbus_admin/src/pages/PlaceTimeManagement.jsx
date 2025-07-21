@@ -50,7 +50,6 @@ const PlaceTimeManagement = () => {
       const newRef = push(ref(realtimeDb, 'routes'));
       set(newRef, newRoute);
   
-      // 초기화
       setOpen(false);
       setRoute('');
       setIsPinned(false);
@@ -65,7 +64,6 @@ const PlaceTimeManagement = () => {
             id,
             ...item
           }));
-          // 고정 공지 먼저 정렬
           list.sort((a, b) => b.isPinned - a.isPinned);
           setRouteList(list);
         } else {
@@ -123,7 +121,7 @@ const PlaceTimeManagement = () => {
       const handleSubmitMemo = async () => {
         if (!selectedRoute || !routeText.trim()) return;
 
-        const targetKey = tabIndex === 1 ? "times" : "stops"; // ✅ 시간/정류장 구분
+        const targetKey = tabIndex === 1 ? "times" : "stops";
         const dataRef = ref(realtimeDb, `routes/${selectedRoute.uid}/${targetKey}`);
         await push(dataRef, routeText.trim());
 
@@ -141,7 +139,6 @@ const PlaceTimeManagement = () => {
           )
         );
 
-        // 초기화
         setIsRouteOpen(false);
         setRouteText('');
         setSelectedRoute(null);
@@ -151,7 +148,7 @@ const PlaceTimeManagement = () => {
       setOpenRouteId(prev => (prev === uid ? null : uid));
       };
 
-      const [selectedTimeInfo, setSelectedTimeInfo] = useState(null); // { routeId, timeId, value }
+      const [selectedTimeInfo, setSelectedTimeInfo] = useState(null); 
       const [openTimeDialog, setOpenTimeDialog] = useState(false);
       const [editTimeText, setEditTimeText] = useState('');
 
@@ -168,7 +165,7 @@ const PlaceTimeManagement = () => {
         setIsStopDialogOpen(true); 
       };
 
-      const [selectedRouteInfo, setSelectedRouteInfo] = useState(null); // { id, name }
+      const [selectedRouteInfo, setSelectedRouteInfo] = useState(null); 
       const [editRouteText, setEditRouteText] = useState('');
       const [openRouteDialog, setOpenRouteDialog] = useState(false);
 
@@ -192,10 +189,10 @@ const PlaceTimeManagement = () => {
           onChange={handleTabChange}
           textColor="primary"
           indicatorColor="primary"
-          variant="standard" // ← 요거!
-          centered             // ← 요거!
+          variant="standard"
+          centered             
           sx={{
-            minWidth: 'fit-content',  // ← 너무 좁게 붙는 거 방지
+            minWidth: 'fit-content',  
           }}
         >
           <Tab label="노선 추가 / 삭제" />
@@ -298,7 +295,6 @@ const PlaceTimeManagement = () => {
                             color="error"
                             onClick={async () => {
                               if (!selectedRouteInfo) return;
-                              // ✅ 삭제 로직 (Firebase에서 삭제, localState에서 제거)
                               await remove(ref(realtimeDb, `routes/${selectedRouteInfo.id}`));
                               setRouteList((prev) => prev.filter((r) => r.id !== selectedRouteInfo.id));
                               setOpenRouteDialog(false);
@@ -310,7 +306,6 @@ const PlaceTimeManagement = () => {
                             color="primary"
                             onClick={async () => {
                               if (!selectedRouteInfo) return;
-                              // ✅ 수정 로직
                               await set(ref(realtimeDb, `routes/${selectedRouteInfo.id}/name`), editRouteText);
                               const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRouteInfo.id}`));
                               const updatedData = updatedSnapshot.val();
@@ -468,7 +463,7 @@ const PlaceTimeManagement = () => {
                   onClick={async () => {
                     if (!selectedTimeInfo) return;
                     const { routeId, timeId } = selectedTimeInfo;
-                    await set(ref(realtimeDb, `routes/${routeId}/times/${timeId}`), editTimeText); // 수정
+                    await set(ref(realtimeDb, `routes/${routeId}/times/${timeId}`), editTimeText); 
                     const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
                     const updatedData = updatedSnapshot.val();
                    

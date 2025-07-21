@@ -26,7 +26,6 @@ function Home() {
         return <DriverManagement/> ;
       case 'managermanage':
         return <ManagerManagement/> ;
-      // 필요한 경우 driver 등 다른 것도 추가
       default:
         return <div>기능을 선택해주세요</div>;
     }
