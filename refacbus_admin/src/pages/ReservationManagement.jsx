@@ -56,7 +56,6 @@ const ReservationManagement = () => {
     const targetDate = `${year.slice(2)}-${month}-${day}`; // 예: "2025-07-15"
     const db = getDatabase();
     const usersRef = ref(db, 'users');
-    console.log('선택한 날짜:', targetDate);
 
 
     try {
@@ -66,14 +65,10 @@ const ReservationManagement = () => {
         let resultList = [];
 
         Object.entries(usersData).forEach(([uid, userInfo]) => {
-          console.log('확인 중인 유저:', userInfo.name);
-          console.log('해당 유저 예약:', userInfo.reservations);
           const { name, email, reservations } = userInfo;
 
           if (reservations) {
             Object.values(reservations).forEach((res) => {
-              console.log('예약 date:', res.date, 'vs targetDate:', targetDate);
-
               if (res.date === targetDate) {
                 resultList.push({
                   name,
@@ -82,7 +77,6 @@ const ReservationManagement = () => {
                   time: res.time || '',
                   canceled: false // 현재 구조엔 취소 여부가 없으므로 기본 false 처리
                 });
-                console.log('일치하는 예약 발견:', res);
               }
             });
           }
@@ -103,7 +97,6 @@ const ReservationManagement = () => {
         alert('예약 데이터가 없습니다.');
       }
     } catch (error) {
-      console.error('에러 발생:', error);
       alert('예약 데이터를 불러오는 중 오류가 발생했습니다.');
     }
   };
@@ -127,7 +120,7 @@ const ReservationManagement = () => {
     const usersData = snapshot.val();
     const counts = {};
 
-    // 🟡 필터 값 직접 계산
+    // 필터 값 직접 계산
     let dynamicFilter = '';
     if (statType === 'route') {
       const shortYear = chartYear ? chartYear.slice(2) : '';
@@ -253,7 +246,6 @@ const ReservationManagement = () => {
       const [yy, mm, dd] = dateStr.split("-");
       return `20${yy}-${mm}-${dd}`;
     };
-     console.log("🔥 전체 삭제된 예약", allDeletedReservations);
 
     const filtered = allDeletedReservations.filter((r) => {
       if (!r.date) return false;
@@ -266,12 +258,9 @@ const ReservationManagement = () => {
         (!deleteMonth || month === deleteMonth) &&
         (!deleteDay || day === deleteDay);
 
-      console.log("🧐 비교중:", { r, fullDate, year, month, day, match });
-
       return match;
     });
 
-    console.log("📊 필터 결과:", filtered);
 
     if (deleteType === "route") {
       // 날짜별 취소 노선 수 (필터 반영된 데이터 사용)
@@ -282,7 +271,6 @@ const ReservationManagement = () => {
       });
       result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
     }
-    console.log("📊 처리된 데이터:", result);
 
     if (deleteType === "time") {
       const grouped = {};
