@@ -1,4 +1,4 @@
-// src/pages/Register.jsx
+
 import { useState } from "react";
 import { firestoreDb, realtimeDb, app } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -54,7 +54,6 @@ export default function Register() {
     
 
     try {
-      // 관리자 코드 확인 (Firestore)
       const docRef = doc(firestoreDb, "admin_code", "admin_key");
       const docSnap = await getDoc(docRef);
 
@@ -69,14 +68,11 @@ export default function Register() {
         return;
       }
 
-      // ✅ 이메일 형식으로 변환
       const email = `${id}@example.com`;
 
-      // Firebase Auth 회원가입
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // Realtime Database에 관리자 정보 저장
       await set(ref(realtimeDb, `admin/${uid}`), {
         id,
         name,

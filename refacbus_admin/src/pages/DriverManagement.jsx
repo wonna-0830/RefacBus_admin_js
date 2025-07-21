@@ -16,8 +16,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AddIcon from "@mui/icons-material/Add";
 import dayjs from "dayjs"; 
-import { getColorByRoute } from "../utils/colorUnits"; // 경로는 너 프로젝트 구조에 맞게!
-
+import { getColorByRoute } from "../utils/colorUnits"; 
 
 const TabPanel = ({ children, value, index }) => {
   return (
@@ -218,12 +217,10 @@ const DriverManagement = () => {
         updates.isBanned = true;
       }
   
-      // 상태 관련 업데이트 (memo 제외)
       if (Object.keys(updates).length > 0) {
         await update(userRef, updates);
       }
   
-      // 로컬 상태 반영
       setAllUsers((prev) =>
         prev.map((u) =>
           u.uid === selectedUserForMemo.uid ? { ...u, ...updates } : u
@@ -243,7 +240,6 @@ const DriverManagement = () => {
       const handleUnban = async (uid) => {
       await update(ref(realtimeDb, `drivers/${uid}`), { isBanned: false });
   
-      // 👉 상태 업데이트
       setAllUsers((prev) =>
         prev.map((u) => (u.uid === uid ? { ...u, isBanned: false } : u))
       );
@@ -287,7 +283,7 @@ const DriverManagement = () => {
   
     const handleOpenReset = (user) => {
       setTargetUser(user);
-      setResetEmail(user.email); // 👉 디폴트 이메일
+      setResetEmail(user.email); 
       setIsResetOpen(true);
     };
   
@@ -319,7 +315,6 @@ const DriverManagement = () => {
               endTime: item.endTime,
             }))
             .sort((a, b) => {
-              // 최신 날짜 + 시간 기준 정렬
               const aDate = new Date(`${a.date}T${a.time}`);
               const bDate = new Date(`${b.date}T${b.time}`);
               return bDate - aDate;
@@ -387,8 +382,7 @@ const DriverManagement = () => {
           if (!selected) return;
 
           setSelectedRouteId(selected.id);
-          setSelectedRouteDetails(selected); // 🔥 전체 노선 정보 저장
-
+          setSelectedRouteDetails(selected); 
           try {
             const snapshot = await get(ref(realtimeDb, `routes/${selected.id}/times`));
             if (snapshot.exists()) {
@@ -414,7 +408,7 @@ const DriverManagement = () => {
       const newSchedule = {
         route: selectedRoute,
         time: selectedTime,
-        duration: duration, // 🔥 필수
+        duration: duration, 
         days: selectedDays,
         createdAt: new Date().toISOString()
       };
@@ -434,19 +428,17 @@ const DriverManagement = () => {
           );
           await set(targetRef, newSchedule);
         } else {
-          // ✅ 추가 모드일 경우 새로 추가
           const newRef = push(scheduleRef);
           await set(newRef, newSchedule);
         }
 
-        // 저장 후 상태 초기화
         setIsAddDialogOpen(false);
         setSelectedRoute('');
         setSelectedTime('');
         setSelectedDays([]);
         setSelectedCellTime('');
         setDuration('');
-        setIsEditing(false); // ✅ 수정 모드 해제
+        setIsEditing(false); 
         setEditingScheduleKey(null);
 
         fetchDriverSchedule(currentTargetUser.uid);
@@ -468,11 +460,10 @@ const DriverManagement = () => {
 
     setDriverSchedules((prev) => ({ ...prev, [uid]: data }));
 
-    // 🧩 기사별 색 계산도 따로 저장
     const newColored = analyzeSchedule(data);
     console.log("🎨 색칠할 셀", newColored);
     setColoredSchedule((prev) => ({
-       ...prev, [uid]: newColored })); // ✅
+       ...prev, [uid]: newColored })); 
   } else {
     console.log("❌ 해당 유저 스케줄 없음:", uid);
   }
@@ -489,13 +480,10 @@ const DriverManagement = () => {
         const { days, time, duration } = item;
         if (!days || !time || !duration) return;
 
-        // 🕐 시간 파싱 (예: "08:30")
         const [hourStr, minuteStr] = time.split(":");
         const hour = parseInt(hourStr, 10);
         const minute = parseInt(minuteStr, 10);
 
-        // 🎯 timeSlots에서 해당 시간이 포함될 "베이스 index" 찾기
-        // 예: 08:30 → 08:00 셀에 포함
         let startIndex = -1;
 
         for (let i = 0; i < timeSlots.length; i++) {
@@ -511,11 +499,9 @@ const DriverManagement = () => {
           }
         }
 
-        if (startIndex === -1) return; // 못 찾은 경우
-
-        // 📌 요일별 셀 색칠
+        if (startIndex === -1) return; 
         days.forEach((day) => {
-          const col = getDayIndex(day); // 월: 0, 화:1, ...
+          const col = getDayIndex(day);
           for (let i = 0; i < duration; i++) {
             const row = startIndex + i;
             const cellKey = `${col}-${row}`;
@@ -561,7 +547,6 @@ const DriverManagement = () => {
           
         >
           <Tab label="기사별 운행 이력" />
-          <Tab label="탑승자 수 통계" />
           <Tab label="기사 계정 관리" />
         </Tabs>
       </Box>
@@ -667,8 +652,7 @@ const DriverManagement = () => {
                                             const isColored = coloredSchedule[user.uid]?.includes(cellKey);
                                             let routeText = '';
                                             let isStartCell = false;
-                                            let bgColor = "inherit"; // 배경색 기본값
-
+                                            let bgColor = "inherit"; 
                                             const scheduleData = driverSchedules[user.uid];
                                             if (scheduleData) {
                                               Object.values(scheduleData).forEach(({ days, time, duration, route }) => {
@@ -687,7 +671,6 @@ const DriverManagement = () => {
                                                     routeText = `${route}\n(${time})`;
                                                     isStartCell = true;
                                                   }
-                                                  // 🌈 여기에 색상 적용!
                                                   bgColor = getColorByRoute(route);
                                                 }
                                               });
@@ -712,9 +695,8 @@ const DriverManagement = () => {
                                                 userSelect: "none"
                                               }}
                                               onClick={() => {
-                                                if (!isColored) return; // 색 없는 셀 클릭 방지
+                                                if (!isColored) return; 
 
-                                                // 🔥 셀 클릭 시, 스케줄 전체 찾아서 수정
                                                 const matchedSchedule = Object.values(driverSchedules[user.uid]).find(
                                                   ({ days, time, duration }) => {
                                                     const startIdx = timeSlots.findIndex((slot) => {
@@ -738,7 +720,7 @@ const DriverManagement = () => {
                                                     value.duration === matchedSchedule.duration &&
                                                     value.route === matchedSchedule.route &&
                                                     JSON.stringify(value.days) === JSON.stringify(matchedSchedule.days)
-                                                )?.[0]; // 🔥 Firebase의 키
+                                                )?.[0]; 
 
                                                 fetchPinnedRoutes(user.uid).then(() => {
                                                   setSelectedDays(matchedSchedule.days);
@@ -746,14 +728,14 @@ const DriverManagement = () => {
                                                   setDuration(matchedSchedule.duration);
                                                   setSelectedRoute(matchedSchedule.route);
                                                   setCurrentTargetUser(user);
-                                                  setIsEditing(true); // ✅ 수정 모드 켜기
-                                                  setEditingScheduleKey(scheduleKey); // ✅ 수정할 항목의 Firebase 키 저장
+                                                  setIsEditing(true); 
+                                                  setEditingScheduleKey(scheduleKey);
                                                   handleRouteSelect({
                                                     target: { value: matchedSchedule.route },
                                                   });
                                                   setIsAddDialogOpen(true);
-                                                }); // ✨ 기존 Dialog 재활용 가능!
-                                                }
+                                                }); 
+                                              }
                                               }}
                                             >
                                               {isStartCell && (
@@ -783,7 +765,7 @@ const DriverManagement = () => {
                 <Dialog open={isAddDialogOpen} onClose={handleCloseAddDialog} 
                   PaperProps={{
                     sx: {
-                      width: "600px", // 원하는 너비(px, %, vw 등)
+                      width: "600px", 
                     },
                   }}>
                   <DialogTitle>스케줄 추가</DialogTitle>
@@ -912,8 +894,7 @@ const DriverManagement = () => {
                 
             </Box>
         </TabPanel>
-        <TabPanel value={tabIndex} index={1}>탑승자 수 통계</TabPanel>
-        <TabPanel value={tabIndex} index={2}>
+        <TabPanel value={tabIndex} index={1}>
           <Box sx={{ width: '100%', height: '100%', backgroundColor: '#fff',  }}>
                 <TextField
                   label="이름으로 검색"
@@ -1054,8 +1035,7 @@ const DriverManagement = () => {
                         email: editedEmail,
                         name: editedName,
                       });
-          
-                      // 🔄 로컬 상태도 갱신
+        
                       setAllUsers((prev) =>
                         prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
                       );

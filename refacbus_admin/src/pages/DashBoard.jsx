@@ -16,7 +16,6 @@ const Dashboard = () => {
     onValue(noticeRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // 'isPinned'가 true인 것만 필터링
         const pinned = Object.values(data).filter(n => n.isPinned === true);
         setNotices(pinned);
       }

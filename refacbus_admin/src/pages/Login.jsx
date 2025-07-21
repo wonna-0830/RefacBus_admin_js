@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,12 +16,10 @@ export default function Login() {
     const togglePasswordVisibility = () => {
     setShowPassword(true);
   
-    // 이전 타이머 제거
     if (passwordTimeoutRef.current) {
       clearTimeout(passwordTimeoutRef.current);
     }
   
-    // 1초 뒤에 다시 가리기
     passwordTimeoutRef.current = setTimeout(() => {
       setShowPassword(false);
     }, 1000);
@@ -82,7 +79,7 @@ export default function Login() {
 
   const handleKeyDown = (e) => {
   if (e.key === 'Enter') {
-    handleLogin(); // 엔터 누르면 로그인 함수 실행
+    handleLogin(); 
   }
 };
 

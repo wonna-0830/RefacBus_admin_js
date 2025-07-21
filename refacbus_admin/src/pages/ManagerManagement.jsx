@@ -57,7 +57,6 @@ const ManagerManagement = () => {
     const newRef = push(ref(realtimeDb, 'notices'));
     set(newRef, newNotice);
 
-    // 초기화
     setOpen(false);
     setTitle('');
     setUrl('');
@@ -73,7 +72,6 @@ const ManagerManagement = () => {
           id,
           ...item
         }));
-        // 고정 공지 먼저 정렬
         list.sort((a, b) => b.isPinned - a.isPinned);
         setNotices(list);
       } else {

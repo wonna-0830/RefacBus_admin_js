@@ -95,7 +95,6 @@ const UserManagement = () => {
       type: isBan ? 'ban' : isWarning ? 'warning' : 'note'
     };
 
-    // 📌 memo는 배열 대신 push로 저장
     await push(memoRef, newMemo);
 
     const snapshot = await get(userRef);
@@ -110,12 +109,10 @@ const UserManagement = () => {
       updates.isBanned = true;
     }
 
-    // 상태 관련 업데이트 (memo 제외)
     if (Object.keys(updates).length > 0) {
       await update(userRef, updates);
     }
 
-    // 로컬 상태 반영
     setAllUsers((prev) =>
       prev.map((u) =>
         u.uid === selectedUserForMemo.uid ? { ...u, ...updates } : u
@@ -134,7 +131,6 @@ const UserManagement = () => {
     const handleUnban = async (uid) => {
     await update(ref(realtimeDb, `users/${uid}`), { isBanned: false });
 
-    // 👉 상태 업데이트
     setAllUsers((prev) =>
       prev.map((u) => (u.uid === uid ? { ...u, isBanned: false } : u))
     );
@@ -178,7 +174,7 @@ const UserManagement = () => {
 
   const handleOpenReset = (user) => {
     setTargetUser(user);
-    setResetEmail(user.email); // 👉 디폴트 이메일
+    setResetEmail(user.email); 
     setIsResetOpen(true);
   };
 
@@ -334,7 +330,6 @@ const UserManagement = () => {
               name: editedName,
             });
 
-            // 🔄 로컬 상태도 갱신
             setAllUsers((prev) =>
               prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
             );
