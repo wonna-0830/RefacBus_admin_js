@@ -56,7 +56,6 @@ const ReservationManagement = () => {
     const targetDate = `${year.slice(2)}-${month}-${day}`; // 예: "2025-07-15"
     const db = getDatabase();
     const usersRef = ref(db, 'users');
-    console.log('선택한 날짜:', targetDate);
 
 
     try {
@@ -66,14 +65,10 @@ const ReservationManagement = () => {
         let resultList = [];
 
         Object.entries(usersData).forEach(([uid, userInfo]) => {
-          console.log('확인 중인 유저:', userInfo.name);
-          console.log('해당 유저 예약:', userInfo.reservations);
           const { name, email, reservations } = userInfo;
 
           if (reservations) {
             Object.values(reservations).forEach((res) => {
-              console.log('예약 date:', res.date, 'vs targetDate:', targetDate);
-
               if (res.date === targetDate) {
                 resultList.push({
                   name,
@@ -82,7 +77,6 @@ const ReservationManagement = () => {
                   time: res.time || '',
                   canceled: false // 현재 구조엔 취소 여부가 없으므로 기본 false 처리
                 });
-                console.log('일치하는 예약 발견:', res);
               }
             });
           }
@@ -103,7 +97,6 @@ const ReservationManagement = () => {
         alert('예약 데이터가 없습니다.');
       }
     } catch (error) {
-      console.error('에러 발생:', error);
       alert('예약 데이터를 불러오는 중 오류가 발생했습니다.');
     }
   };
@@ -127,7 +120,7 @@ const ReservationManagement = () => {
     const usersData = snapshot.val();
     const counts = {};
 
-    // 🟡 필터 값 직접 계산
+    // 필터 값 직접 계산
     let dynamicFilter = '';
     if (statType === 'route') {
       const shortYear = chartYear ? chartYear.slice(2) : '';
@@ -194,14 +187,132 @@ const ReservationManagement = () => {
     fetchRouteNames();
   }, []);
 
-
-
   const handleStatTypeChange = (e) => {
     const selectedType = e.target.value;
     setStatType(selectedType);
     setFilterValue(''); // 유형이 바뀌면 필터 초기화
   };
 
+  const [allDeletedReservations, setAllDeletedReservations] = useState([]);
+  const [deleteType, setDeleteType] = useState("routeTotal"); // 기본값은 "route"
+  const [filteredRouteDeletes, setFilteredRouteDeletes] = useState([]);
+
+
+  useEffect(() => {
+    const db = getDatabase();
+    const usersRef = ref(db, "users");
+
+    get(usersRef).then((snapshot) => {
+      const all = [];
+      snapshot.forEach((userSnap) => {
+        const reservations = userSnap.child("reservations");
+        reservations.forEach((resSnap) => {
+          const data = resSnap.val();
+          if (data.deleted === true) {
+            all.push({
+              route: data.route,
+              time: data.time,
+              date: data.date,
+              reason: data.reason,
+            });
+          }
+        });
+      });
+      setAllDeletedReservations(all);
+    });
+  }, []);
+  
+
+
+  const [deleteYear, setDeleteYear] = useState('');
+  const [deleteMonth, setDeleteMonth] = useState('');
+  const [deleteDay, setDeleteDay] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+
+  const handleDeleteYearChange = (e) => setDeleteYear(e.target.value);
+  const handleDeleteMonthChange = (e) => setDeleteMonth(e.target.value);
+  const handleDeleteDayChange = (e) => setDeleteDay(e.target.value);
+
+  const handleDeleteChange = (event) => {
+    setDeleteType(event.target.value);
+    
+  };
+
+  const handleDeleteSearch = () => {
+    let result = [];
+
+    const formatDate = (dateStr) => {
+      // 예: 25-07-21 → 2025-07-21
+      const [yy, mm, dd] = dateStr.split("-");
+      return `20${yy}-${mm}-${dd}`;
+    };
+
+    const filtered = allDeletedReservations.filter((r) => {
+      if (!r.date) return false;
+
+      const fullDate = formatDate(r.date); // "2025-07-21"
+      const [year, month, day] = fullDate.split("-");
+
+      const match =
+        (!deleteYear || year === deleteYear) &&
+        (!deleteMonth || month === deleteMonth) &&
+        (!deleteDay || day === deleteDay);
+
+      return match;
+    });
+
+
+    if (deleteType === "route") {
+      // 날짜별 취소 노선 수 (필터 반영된 데이터 사용)
+      const grouped = {};
+      filtered.forEach((r) => {
+        const key = `${r.route}`;
+        grouped[key] = (grouped[key] || 0) + 1;
+      });
+      result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
+    }
+
+    if (deleteType === "time") {
+      const grouped = {};
+
+      allDeletedReservations
+        .filter((r) => selectedTime === "" || r.route === selectedTime)
+        .forEach((r) => {
+          const key = r.time;
+          grouped[key] = (grouped[key] || 0) + 1;
+        });
+
+        result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
+      }
+
+
+    if (deleteType === "routeTotal") {
+      const grouped = {};
+      allDeletedReservations.forEach((r) => {
+        grouped[r.route] = (grouped[r.route] || 0) + 1;
+      });
+      result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
+    }
+
+    if (deleteType === "reason") {
+      const grouped = {};
+      allDeletedReservations.forEach((r) => {
+        const reasons = r.reason?.split(",") ?? [];
+        reasons.forEach((re) => {
+          const trimmed = re.trim();
+          grouped[trimmed] = (grouped[trimmed] || 0) + 1;
+        });
+      });
+      result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
+    }
+
+    setFilteredRouteDeletes(result);
+  };
+
+
+  
+
+  
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -406,7 +517,76 @@ const ReservationManagement = () => {
             </ResponsiveContainer>
 
           </TabPanel>
-                  <TabPanel value={tabIndex} index={2}>시간대별 취소, 노선대별 취소, 등등</TabPanel>
+        <TabPanel value={tabIndex} index={2}><Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5}}>
+              <FormControl sx={{ width: 200 }}>
+                <InputLabel>통계 유형</InputLabel>
+                <Select value={deleteType} onChange={handleDeleteChange}>
+                  <MenuItem value="route">날짜별 취소 노선 수</MenuItem>
+                  <MenuItem value="time">노선별 취소 시간대</MenuItem>
+                  <MenuItem value="routeTotal">전체 취소 노선 수</MenuItem>
+                  <MenuItem value="reason">전체 취소 사유</MenuItem>
+                </Select>
+              </FormControl>
+              {deleteType === 'route' && (
+              <>
+                {/* chartYear, chartMonth, chartDay 드롭다운 그대로 사용! */}
+                <FormControl sx={{ width: 150 }}>
+                  <InputLabel>년도</InputLabel>
+                  <Select value={deleteYear} onChange={handleDeleteYearChange}>
+                    <MenuItem value="">전체</MenuItem>
+                    <MenuItem value="2023">2023</MenuItem>
+                    <MenuItem value="2024">2024</MenuItem>
+                    <MenuItem value="2025">2025</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl sx={{ width: 150 }}>
+                  <InputLabel>월</InputLabel>
+                  <Select value={deleteMonth} onChange={handleDeleteMonthChange}>
+                    <MenuItem value="">전체</MenuItem>
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <MenuItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                        {i + 1}월
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl sx={{ width: 150 }}>
+                  <InputLabel>일</InputLabel>
+                  <Select value={deleteDay} onChange={handleDeleteDayChange}>
+                    <MenuItem value="">전체</MenuItem>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <MenuItem key={i + 1} value={String(i + 1).padStart(2, '0')}>
+                        {i + 1}일
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </>
+            )}
+            {(deleteType === 'time') && (
+              <FormControl sx={{ width: 200 }}>
+                <InputLabel>노선 선택</InputLabel>
+                <Select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)}>
+                  {routeList.map((route) => (
+                    <MenuItem key={route} value={route}>{route}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+              <Button variant="contained" onClick={handleDeleteSearch}>조회</Button>
+            </Box>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={filteredRouteDeletes}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#FABE00" barSize={50} />
+              </BarChart>
+            </ResponsiveContainer>
+          </TabPanel>
                   
                 </Box>
               </Box>
