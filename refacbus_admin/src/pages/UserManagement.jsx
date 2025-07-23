@@ -7,10 +7,15 @@ import {
 import { ref, get, update, push, set } from "firebase/database";
 import { realtimeDb, auth } from "../firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import dayjs from "dayjs"; 
+import UserTable from '../components/User/UserTable';
+import MemoDialog from '../components/User/MemoDialog';
+import MemoHistoryDialog from '../components/User/MemoHistoryDialog';
+import UserEditDialog from '../components/User/UserEditDialog';
+import PasswordResetDialog from '../components/User/PasswordResetDialog';
+import SearchBar from '../components/common/SearchBar';
+
+
 
 const UserManagement = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -161,10 +166,6 @@ const UserManagement = () => {
   };
 
 
-  const filteredMemoList = selectedMemoList.filter(memo => 
-  memoFilter === "all" ? true : memo.type === memoFilter
-  );
-
   const handleOpenEditDialog = (user) => {
     setEditingUser(user);
     setEditedEmail(user.email ?? "");
@@ -190,175 +191,73 @@ const UserManagement = () => {
 
   return (
     <Box sx={{ width: '100%', backgroundColor: '#fff', padding: 2 }}>
-      <TextField
-        label="이름으로 검색"
-        variant="outlined"
-        size="small"
+      <SearchBar
         value={searchKeyword}
         onChange={(e) => setSearchKeyword(e.target.value)}
-        sx={{ width: '500px', mb: 2 }}
+        placeholder="이름으로 검색"
       />
+      <UserTable
+        users={filteredUsers}
+        anchorEl={anchorEl}
+        anchorUserId={anchorUserId}
+        onMemoClick={handleOpenMemo}
+        onMenuClick={handleMenuOpen}
+        onMenuClose={handleMenuClose}
+        onUnban={handleUnban}
+        onReset={handleOpenReset}
+        onEdit={handleOpenEditDialog}
+        onMemoHistory={handleOpenMemoHistory}
+      />
+      <MemoDialog
+        open={isMemoOpen}
+        memoText={memoText}
+        setMemoText={setMemoText}
+        isWarning={isWarning}
+        setIsWarning={setIsWarning}
+        isBan={isBan}
+        setIsBan={setIsBan}
+        onConfirm={handleSubmitMemo}
+        onCancel={handleCloseMemo}
+      />
+      <MemoHistoryDialog
+        open={isMemoHistoryOpen}
+        onClose={() => setIsMemoHistoryOpen(false)}
+        memoFilter={memoFilter}
+        setMemoFilter={setMemoFilter}
+        memoList={selectedMemoList}
+      />
+      <UserEditDialog
+        open={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onConfirm={async () => {
+          if (!editingUser) return;
+          const userRef = ref(realtimeDb, `users/${editingUser.uid}`);
+          await update(userRef, {
+            email: editedEmail,
+            name: editedName,
+          });
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>uid</TableCell>
-            <TableCell>아이디</TableCell>
-            <TableCell>이름</TableCell>
-            <TableCell>가입 날짜</TableCell>
-            <TableCell>경고 횟수</TableCell>
-            <TableCell>정지</TableCell>
-            <TableCell>작업</TableCell>
-            <TableCell>메모</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredUsers.map((user) => (
-            <TableRow key={user.uid}>
-              <TableCell>{user.uid}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.joinDate}</TableCell>
-              <TableCell>{user.warningCount ?? 0}</TableCell>
-              <TableCell>{user.isBanned ? "정지됨" : "X"}</TableCell>
+          setAllUsers((prev) =>
+            prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
+          );
+          setFilteredUsers((prev) =>
+            prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
+          );
 
-              <TableCell>
-                <IconButton onClick={(e) => handleMenuOpen(e, user)}>
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={anchorUserId === user.uid}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={() => handleUnban(user.uid)}>정지 해제</MenuItem>
-                  <MenuItem onClick={() => { handleOpenReset(user); handleMenuClose(); }}>비밀번호 초기화</MenuItem>
-                  <MenuItem onClick={() => { handleOpenEditDialog(user); handleMenuClose(); }}>회원 수정</MenuItem>
-                  <MenuItem onClick={() => {handleOpenMemoHistory(user);handleMenuClose();}}>메모 보기</MenuItem>
-                </Menu>
-              </TableCell>
-
-              <TableCell>
-                <IconButton onClick={() => handleOpenMemo(user)}>
-                  <EditNoteIcon />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <Dialog open={isMemoOpen} onClose={handleCloseMemo}>
-        <DialogTitle>관리자 메모</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="메모 내용"
-            multiline
-            fullWidth
-            value={memoText}
-            onChange={(e) => setMemoText(e.target.value)}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={isWarning} onChange={(e) => setIsWarning(e.target.checked)} />}
-            label="경고 부여"
-          />
-          <FormControlLabel
-            control={<Checkbox checked={isBan} onChange={(e) => setIsBan(e.target.checked)} />}
-            label="계정 정지"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSubmitMemo} color="primary">확인</Button>
-          <Button onClick={handleCloseMemo} color="secondary">취소</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={isMemoHistoryOpen} onClose={() => setIsMemoHistoryOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>📋 메모 이력</DialogTitle>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2, px: 3 }}>
-              <Button variant={memoFilter === "all" ? "contained" : "outlined"} onClick={() => setMemoFilter("all")}>전체</Button>
-              <Button variant={memoFilter === "warning" ? "contained" : "outlined"} onClick={() => setMemoFilter("warning")}>경고</Button>
-              <Button variant={memoFilter === "ban" ? "contained" : "outlined"} onClick={() => setMemoFilter("ban")}>정지</Button>
-            </Box>
-        <DialogContent>
-          {selectedMemoList.length === 0 ? (
-            <Typography>메모 이력이 없습니다.</Typography>
-          ) : (
-            <Box>
-              {filteredMemoList.map((memo, index) => (
-                <Box key={index}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    {memo.timestamp} / {memo.writer}
-                  </Typography>
-                  <Paper sx={{ p: 1, mb: 2 }}>
-                    <Typography>{memo.text}</Typography>
-                  </Paper>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsMemoHistoryOpen(false)}>닫기</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
-        <DialogTitle>회원 정보 수정</DialogTitle>
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="이메일"
-            fullWidth
-            value={editedEmail}
-            onChange={(e) => setEditedEmail(e.target.value)}
-          />
-          <TextField
-            margin="dense"
-            label="이름"
-            fullWidth
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsEditDialogOpen(false)}>취소</Button>
-          <Button onClick={async () => {
-            if (!editingUser) return;
-            const userRef = ref(realtimeDb, `users/${editingUser.uid}`);
-            await update(userRef, {
-              email: editedEmail,
-              name: editedName,
-            });
-
-            setAllUsers((prev) =>
-              prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
-            );
-            setFilteredUsers((prev) =>
-              prev.map((u) => u.uid === editingUser.uid ? { ...u, email: editedEmail, name: editedName } : u)
-            );
-
-            setIsEditDialogOpen(false);
-          }} color="primary">확인</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={isResetOpen} onClose={() => setIsResetOpen(false)}>
-        <DialogTitle>비밀번호 초기화</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="이메일"
-            value={resetEmail}
-            onChange={(e) => setResetEmail(e.target.value)}
-          />
-          <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-            기본 이메일이 입력되어 있으며, 필요 시 변경 가능합니다.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSendResetEmail} color="primary">확인</Button>
-          <Button onClick={() => setIsResetOpen(false)} color="secondary">취소</Button>
-        </DialogActions>
-      </Dialog>
+          setIsEditDialogOpen(false);
+        }}
+        email={editedEmail}
+        name={editedName}
+        setEmail={setEditedEmail}
+        setName={setEditedName}
+      />
+      <PasswordResetDialog
+        open={isResetOpen}
+        email={resetEmail}
+        setEmail={setResetEmail}
+        onConfirm={handleSendResetEmail}
+        onClose={() => setIsResetOpen(false)}
+      />
     </Box>
   );
 };
