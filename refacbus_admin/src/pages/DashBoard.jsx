@@ -3,11 +3,16 @@ import Box from '@mui/material/Box';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { Typography, List, ListItemButton, ListItemText, Paper } from '@mui/material';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, get } from 'firebase/database';
+import SharedCalendar from "../components/calendar/SharedCalendar";
+import ScheduleCardBox from "../components/DashBoardSchedule/ScheduleCardBox"; 
+
 
 const Dashboard = () => {
   const [value, setValue] = useState(new Date());
   const [notices, setNotices] = useState([]);
+  const [markedDates, setMarkedDates] = useState([]);
+
 
   useEffect(() => {
     const db = getDatabase();
@@ -22,6 +27,32 @@ const Dashboard = () => {
     });
   }, []);
 
+  useEffect(() => {
+    const fetchMarkedDates = async () => {
+          const db = getDatabase();
+          const scheduleRef = ref(db, "managerSchedules");
+          const snapshot = await get(scheduleRef);
+    
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+    
+            const uniqueDates = new Set();
+            for (const date of Object.keys(data)) {
+              const entries = Object.values(data[date]);
+              if (entries.length > 0) {
+                uniqueDates.add(date);
+              }
+            }
+    
+            setMarkedDates(Array.from(uniqueDates));
+          }
+        };
+    
+        fetchMarkedDates();
+      
+  }, []);
+    
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>
@@ -30,14 +61,11 @@ const Dashboard = () => {
 
       <Box sx={{ display: 'flex', gap: 2}}>
         {/* 캘린더 */}
-        <Paper elevation={3}
-        sx={{ width: 500, height:400, p: 2,borderRadius: 2, '& .react-calendar': {width: '100%', height:'100%', fontSize: '1.2rem', },}}>
-          <Calendar 
-            onChange={setValue}
-            value={value}
-            className="custom-calendar"
-          />
-        </Paper>
+        <SharedCalendar
+          value={value}
+          onChange={setValue}
+          markedDates={markedDates}
+        />
 
         {/* 공지사항 */}
         <Box sx={{backgroundColor: '#fff', p: 2, borderRadius: 2,  boxShadow: 3 }}>
@@ -60,6 +88,7 @@ const Dashboard = () => {
           </List>
         </Box>
       </Box>
+      <ScheduleCardBox />
     </Box>
   );
 };
