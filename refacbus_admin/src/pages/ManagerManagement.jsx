@@ -1,50 +1,37 @@
 import React, { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, TextField, IconButton, Button, Typography
+ IconButton, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box
 } from '@mui/material';
 import { useEffect } from 'react';
 import { onValue } from 'firebase/database';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import AddIcon from '@mui/icons-material/Add';
 import { push, ref, set, update } from 'firebase/database';
 import { realtimeDb } from '../firebase'; 
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import Manager_Schedule from "../components/Manager/Manager_Schedule";
+import TabbedContainer from '../components/common/TabbedContainer';
+import TabPanel from '../components/common/TabPanel';
+import NoticeFormDialog from '../components/Notice/NoticeFormDialog';
 
-
-const TabPanel = ({ children, value, index }) => {
-  return (
-    <div hidden={value !== index}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-};
 
 const ManagerManagement = () => {
+  //탭 상태
   const [tabIndex, setTabIndex] = useState(0);
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState('');
-  const [url, setUrl] = useState('');
-  const [isPinned, setIsPinned] = useState(false);
-  const [notices, setNotices] = useState([]);
-
   const handleTabChange = (event, newValue) => {
     setTabIndex(newValue);
   };
 
+  //공지사항 다이얼로그 관련
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [isPinned, setIsPinned] = useState(false);
+
+  //공지사항 목록
+  const [notices, setNotices] = useState([]);
+
+  //공지사항 제출 핸들러
   const handleSubmit = () => {
     const newNotice = {
       title,
@@ -63,6 +50,7 @@ const ManagerManagement = () => {
     setIsPinned(false);
   };
 
+  //공지사항 목록 실시간 불러오기
   useEffect(() => {
     const noticesRef = ref(realtimeDb, 'notices');
     onValue(noticesRef, snapshot => {
@@ -80,6 +68,7 @@ const ManagerManagement = () => {
     });
   }, []);
 
+  //고정여부 토글 핸들러
   const togglePinned = (id, currentState) => {
   const noticeRef = ref(realtimeDb, `notices/${id}`);
   update(noticeRef, { isPinned: !currentState });
@@ -89,32 +78,11 @@ const ManagerManagement = () => {
   return (
     <Box sx={{ width: '100%' }}>
       
-      {/* 탭 메뉴 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          py: 1,
-          px: 5,
-          boxShadow: 1,
-        }}
-      >
-        <Tabs
-          value={tabIndex}
-          onChange={handleTabChange}
-          textColor="primary"
-          indicatorColor="primary"
-          variant="standard" 
-          centered             
-          sx={{
-            minWidth: 'fit-content',  
-          }}
-        >
-          <Tab label="관리자 역할 구분" />
-          <Tab label="주요 기능 접근 제한" />
-          <Tab label="일정 등록 및 관리" />
-          <Tab label="공지사항 등록 및 관리" />
-        </Tabs>
-      </Box>
+      <TabbedContainer
+          tabIndex={tabIndex}
+          handleTabChange={handleTabChange}
+          labels={["관리자 역할 구분", "일정 등록 및 관리", "공지사항 등록 및 관리"]}
+        />
 
       {/* 회색 박스 본문 */}
       <Box
@@ -128,9 +96,10 @@ const ManagerManagement = () => {
         }}
       >
         <TabPanel value={tabIndex} index={0}>관리자 역할 구분</TabPanel>
-        <TabPanel value={tabIndex} index={1}>주요 기능 접근 제한</TabPanel>
-        <TabPanel value={tabIndex} index={2}>일정 등록 및 관리</TabPanel>
-        <TabPanel value={tabIndex} index={3}>
+        <TabPanel value={tabIndex} index={1}>
+          <Manager_Schedule />
+        </TabPanel>
+        <TabPanel value={tabIndex} index={2}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -140,36 +109,17 @@ const ManagerManagement = () => {
             새 공지사항 등록
           </Button>
 
-          {/* 팝업 다이얼로그 */}
-          <Dialog open={open} onClose={() => setOpen(false)}>
-            <DialogTitle>공지사항 등록</DialogTitle>
-            <DialogContent>
-              <TextField
-                label="제목"
-                fullWidth
-                margin="normal"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-              />
-              <TextField
-                label="URL"
-                fullWidth
-                margin="normal"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-              />
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <IconButton onClick={() => setIsPinned(prev => !prev)}>
-                  {isPinned ? <StarIcon color="primary" /> : <StarBorderIcon />}
-                </IconButton>
-                <Typography>{isPinned ? '대시보드에 노출됨' : '공지사항에 등록'}</Typography>
-              </Box>
-              <Box sx={{ mt: 2 }}>
-                <Button variant="contained" onClick={handleSubmit}>등록</Button>
-                <Button onClick={() => setOpen(false)} sx={{ ml: 1 }}>취소</Button>
-              </Box>
-            </DialogContent>
-          </Dialog>
+          <NoticeFormDialog
+            open={open}
+            title={title}
+            setTitle={setTitle}
+            url={url}
+            setUrl={setUrl}
+            isPinned={isPinned}
+            setIsPinned={setIsPinned}
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
