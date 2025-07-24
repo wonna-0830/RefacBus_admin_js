@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -16,10 +15,25 @@ import ReservationsIcon from '@mui/icons-material/DirectionsBus';
 import DriveNoteIcon from '@mui/icons-material/EventNote';
 import ManagerIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
-
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom"; 
 const drawerWidth = 240;
 
 const Sidebar = ({ onMenuSelect }) => {
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/Login"); // 로그인 페이지 경로
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+      alert("로그아웃에 실패했습니다.");
+    }
+  };
+
   return (
     <Drawer
       sx={{
@@ -71,7 +85,7 @@ const Sidebar = ({ onMenuSelect }) => {
       </List>
       <Divider sx={{ backgroundColor: '#ffffff33' }} />
       <List>
-        <ListItemButton>
+        <ListItemButton onClick={handleLogout}>
           <ListItemIcon sx={{ color: 'white' }}><LogoutIcon /></ListItemIcon>
           <ListItemText primary="로그아웃" />
         </ListItemButton>
