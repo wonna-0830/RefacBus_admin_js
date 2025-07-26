@@ -1,0 +1,12 @@
+.highlight {
+  background-color: #FABE00; /* 파란 배경 */
+  color: black;
+  border-radius: 50%;
+  font-weight: bold;
+}
+.react-calendar__tile.highlight {
+  background: #90caf9 !important;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+}

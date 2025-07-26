@@ -8,8 +8,22 @@ import ReservationManagement from './ReservationManagement';
 import DriverManagement from './DriverManagement.jsx';
 import ManagerManagement from './ManagerManagement.jsx';
 import DashBoard from './DashBoard.jsx';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase";
 
 function Home() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        navigate("/Login", { replace: true });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [selectedMenu, setSelectedMenu] = useState('home');
 
   const renderContent = () => {
