@@ -39,39 +39,40 @@ export default function Login() {
         alert("이메일과 비밀번호를 입력해주세요.")
         return
     }
-    
 
-    const fullEmail = `${id}@example.com`
+    // ✅ 이메일 보정
+    const fullEmail = id.includes('@') ? id : `${id}@gmail.com`;
 
-    try{
-        const userCredential = await signInWithEmailAndPassword(auth, fullEmail, password)
-        const uid = userCredential.user.uid;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, fullEmail, password);
+      const uid = userCredential.user.uid;
 
-        if (rememberId) {
-             localStorage.setItem("savedId", id);
-        } else {
-            localStorage.removeItem("savedId");
-        }
-        
-        const snapshot = await get(ref(realtimeDb, `admin/${uid}`))
-        if (snapshot.exists()){
-            const userData = snapshot.val()
-            console.log("환영합니다,", userData.name)
-            navigate("/Home");
-        } else {
-            alert("관리자 정보가 존재하지 않습니다.")
-        }
+      if (rememberId) {
+        localStorage.setItem("savedId", id);
+      } else {
+        localStorage.removeItem("savedId");
+      }
+
+      const snapshot = await get(ref(realtimeDb, `admin/${uid}`));
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        console.log("환영합니다,", userData.name);
+        navigate("/Home");
+      } else {
+        alert("관리자 정보가 존재하지 않습니다.");
+      }
     } catch (error) {
-        if (error.code === "auth/user-not-found"){
-            alert("존재하지 않는 계정입니다.")
-        } else if (error.code === "auth/wrong-password"){
-            alert("비밀번호를 다시 확인해주세요.")
-        } else {
-            alert("로그인에 실패했습니다.")
-            console.error(error)
-        }
+      if (error.code === "auth/user-not-found") {
+        alert("존재하지 않는 계정입니다.");
+      } else if (error.code === "auth/wrong-password") {
+        alert("비밀번호를 다시 확인해주세요.");
+      } else {
+        alert("로그인에 실패했습니다.");
+        console.error(error);
+      }
     }
   };
+
 
   const handleRegister = () => {
     navigate("/Register");

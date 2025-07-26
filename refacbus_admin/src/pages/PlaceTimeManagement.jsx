@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEffect } from 'react';
 import { onValue } from 'firebase/database';import StarIcon from '@mui/icons-material/Star';
 import AddIcon from '@mui/icons-material/Add';
-import { TextField, Box, Button, } from '@mui/material';
+import { Typography, Box, Button, } from '@mui/material';
 import { ref, get, update, push, set } from "firebase/database";
 import { realtimeDb, auth } from "../firebase";
 import TabbedContainer from '../components/common/TabbedContainer';
@@ -15,11 +15,14 @@ import StopEditDialog from '../components/PlaceTime/StopEditDialog';
 import RouteListTable from '../components/PlaceTime/RouteListTable';
 import TimeStopTable from '../components/PlaceTime/TimeStopTable';
 import SearchBar from '../components/common/SearchBar';
+import { useAdmin } from '../context/AdminContext';
+import { hasPermission } from '../utils/permissionUtil';
 
 
 
 const PlaceTimeManagement = () => {
-
+  const admin = useAdmin();
+  if (!admin) return null;
   // 탭 관련
   const [tabIndex, setTabIndex] = useState(0);
   const handleTabChange = (event, newValue) => {
@@ -297,7 +300,8 @@ const PlaceTimeManagement = () => {
         }}
       >
         <TabPanel value={tabIndex} index={0}>
-          
+          {hasPermission(admin, '노선 추가 및 삭제') ? (
+          <Box>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -306,8 +310,6 @@ const PlaceTimeManagement = () => {
               >
             새 노선 등록
           </Button>
-          
-          
           <RouteAddDialog
             open={open}
             routeName={routeName}
@@ -327,8 +329,13 @@ const PlaceTimeManagement = () => {
             }}
             onTogglePinned={(id, currentPinned) => togglePinned(id, currentPinned)}
           />       
+          </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
         <TabPanel value={tabIndex} index={1}>
+          {hasPermission(admin, '노선 시간대 설정 및 관리') ? (
           <Box sx={{ width: '100%', backgroundColor: '#fff', padding: 2 }}>
             <SearchBar
               value={searchKeyword}
@@ -370,8 +377,12 @@ const PlaceTimeManagement = () => {
             />
 
           </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
         <TabPanel value={tabIndex} index={2}>
+          {hasPermission(admin, '노선 정류장 설정 및 관리') ? (
           <Box sx={{ width: '100%', backgroundColor: '#fff', padding: 2 }}>
             <SearchBar
               value={searchKeyword}
@@ -412,6 +423,9 @@ const PlaceTimeManagement = () => {
             />
 
           </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
       </Box>
     </Box>

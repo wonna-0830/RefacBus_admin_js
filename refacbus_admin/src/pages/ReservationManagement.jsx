@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Box, Button, } from '@mui/material';
+import { Typography, Box, Button, } from '@mui/material';
 import { getDatabase, ref, get, child } from 'firebase/database';
 import TabbedContainer from '../components/common/TabbedContainer';
 import TabPanel from '../components/common/TabPanel';
@@ -9,13 +9,17 @@ import StatFilterBar from '../components/Reservation/StatFilterBar';
 import DeleteStatFilterBar from '../components/Reservation/DeleteStatFilterBar';
 import StatBarChart from '../components/Reservation/StatBarChart';
 import SearchBar from '../components/common/SearchBar';
+import { useAdmin } from '../context/AdminContext';
+import { hasPermission } from '../utils/permissionUtil';
 
 
 const ReservationManagement = () => {
+  const admin = useAdmin();
+    if (!admin) return null;
   const [tabIndex, setTabIndex] = useState(0);
   const handleTabChange = (event, newValue) => setTabIndex(newValue);
 
-  // -------------------- 🔹 [2] 날짜별 예약자 목록 --------------------
+  //날짜별 예약자 목록
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
@@ -78,7 +82,7 @@ const ReservationManagement = () => {
     }
   };
 
-  // -------------------- 🔹 [3] 예약 통계 --------------------
+  //예약 통계
   const [statType, setStatType] = useState('routeTotal');
   const [filterValue, setFilterValue] = useState('');
   const [chartYear, setChartYear] = useState('');
@@ -160,7 +164,7 @@ const ReservationManagement = () => {
     fetchRouteNames();
   }, []);
 
-  // -------------------- 🔹 [4] 예약 취소 통계 --------------------
+  //예약 취소 통계 
   const [allDeletedReservations, setAllDeletedReservations] = useState([]);
   const [deleteType, setDeleteType] = useState("routeTotal");
   const [filteredRouteDeletes, setFilteredRouteDeletes] = useState([]);
@@ -279,45 +283,56 @@ const ReservationManagement = () => {
           maxWidth: 'none',
         }}
       >
-        <TabPanel value={tabIndex} index={0}> 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2,}}>
-            <DateSelector
-              year={year}
-              month={month}
-              day={day}
-              onYearChange={handleYearChange}
-              onMonthChange={handleMonthChange}
-              onDayChange={handleDayChange}
-              allowEmpty={false} 
-            />
+        <TabPanel value={tabIndex} index={0}>
+          {hasPermission(admin, '예약자 목록') ? ( 
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2,}}>
+              <DateSelector
+                year={year}
+                month={month}
+                day={day}
+                onYearChange={handleYearChange}
+                onMonthChange={handleMonthChange}
+                onDayChange={handleDayChange}
+                allowEmpty={false} 
+              />
 
-            <SearchBar
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              placeholder="이름으로 검색"
-            />
+             <SearchBar
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="이름으로 검색"
+              />
               
-            <Button variant="contained" onClick={handleSearch}>조회</Button>
-          </Box>
-          <ReservationListTable data={filteredData} />
-
+              <Button variant="contained" onClick={handleSearch}>조회</Button>
+            </Box>
+            <ReservationListTable data={filteredData} />
+          </Box> 
+           ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}  
         </TabPanel>
         <TabPanel value={tabIndex} index={1}>
-          <StatFilterBar
-            statType={statType}
-            onTypeChange={handleStatTypeChange}
-            chartYear={chartYear}
-            chartMonth={chartMonth}
-            chartDay={chartDay}
-            onYearChange={handleChartYearChange}
-            onMonthChange={handleChartMonthChange}
-            onDayChange={handleChartDayChange}
-            selectedRoute={selectedRoute}
-            onRouteChange={setSelectedRoute}
-            routeList={routeList}
-            onSearchClick={handleChartSearch}
-          />
-          <StatBarChart data={filteredRouteStats} />
+          {hasPermission(admin, '예약 통계') ? (
+          <Box>
+            <StatFilterBar
+              statType={statType}
+              onTypeChange={handleStatTypeChange}
+              chartYear={chartYear}
+              chartMonth={chartMonth}
+              chartDay={chartDay}
+              onYearChange={handleChartYearChange}
+              onMonthChange={handleChartMonthChange}
+              onDayChange={handleChartDayChange}
+              selectedRoute={selectedRoute}
+              onRouteChange={setSelectedRoute}
+              routeList={routeList}
+              onSearchClick={handleChartSearch}
+            />
+            <StatBarChart data={filteredRouteStats} />
+          </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
         <TabPanel value={tabIndex} index={2}>
           <DeleteStatFilterBar

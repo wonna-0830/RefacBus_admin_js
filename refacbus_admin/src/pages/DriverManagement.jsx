@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box,} from '@mui/material';
+import { Box, Typography} from '@mui/material';
 import { ref, get, update, push, set } from "firebase/database";
 import { realtimeDb, auth } from "../firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -9,9 +9,12 @@ import { TabbedContainer, TabPanel } from '../components/common';
 import { DriverListTable, DriverScheduleDialog, DrivingHistoryDialog, ResetPasswordDialog } from '../components/Driver';
 import { timeSlots, days, getDayIndex } from '../components/Driver/constants';
 import SearchBar from '../components/common/SearchBar';
+import { useAdmin } from '../context/AdminContext';
+import { hasPermission } from '../utils/permissionUtil';
 
 const DriverManagement = () => {
-
+  const admin = useAdmin();
+  if (!admin) return null;
   // 기본 UI 상태 및 탭 변환
   const [tabIndex, setTabIndex] = useState(0);
   const handleTabChange = (event, newValue) => {
@@ -479,6 +482,7 @@ const DriverManagement = () => {
         }}
       >
         <TabPanel value={tabIndex} index={0}>
+          {hasPermission(admin, '기사별 운행 이력') ? (
           <Box sx={{ width: '100%', height: '100%', backgroundColor: '#fff',  }}>
             <SearchBar
               value={searchKeyword}
@@ -530,8 +534,12 @@ const DriverManagement = () => {
               historyList={drivingHistory}
             />
           </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
         <TabPanel value={tabIndex} index={1}>
+          {hasPermission(admin, '기사 계정 관리') ? (
           <Box sx={{ width: '100%', height: '100%', backgroundColor: '#fff',  }}>
             <SearchBar
               value={searchKeyword}
@@ -576,6 +584,9 @@ const DriverManagement = () => {
               onClose={() => setIsResetOpen(false)}
             />
           </Box>
+          ) : (
+          <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+        )}
         </TabPanel>
       </Box>
     </Box>
