@@ -19,6 +19,8 @@ import { realtimeDb } from '../firebase';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Manager_Schedule from "../components/Manager_Schedule";
+
 
 
 const TabPanel = ({ children, value, index }) => {
@@ -110,7 +112,6 @@ const ManagerManagement = () => {
           }}
         >
           <Tab label="관리자 역할 구분" />
-          <Tab label="주요 기능 접근 제한" />
           <Tab label="일정 등록 및 관리" />
           <Tab label="공지사항 등록 및 관리" />
         </Tabs>
@@ -128,9 +129,10 @@ const ManagerManagement = () => {
         }}
       >
         <TabPanel value={tabIndex} index={0}>관리자 역할 구분</TabPanel>
-        <TabPanel value={tabIndex} index={1}>주요 기능 접근 제한</TabPanel>
-        <TabPanel value={tabIndex} index={2}>일정 등록 및 관리</TabPanel>
-        <TabPanel value={tabIndex} index={3}>
+        <TabPanel value={tabIndex} index={1}>
+          <Manager_Schedule />
+        </TabPanel>
+        <TabPanel value={tabIndex} index={2}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
