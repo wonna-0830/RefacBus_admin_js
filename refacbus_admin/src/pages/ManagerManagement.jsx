@@ -17,23 +17,11 @@ import AddIcon from '@mui/icons-material/Add';
 import { push, ref, set, update } from 'firebase/database';
 import { realtimeDb } from '../firebase'; 
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Manager_Schedule from "../components/Manager_Schedule";
+import Manager_Schedule from "../components/Manager/Manager_Schedule";
+import TabbedContainer from '../components/common/TabbedContainer';
+import TabPanel from '../components/common/TabPanel';
+import NoticeFormDialog from '../components/Notice/NoticeFormDialog';
 
-
-
-const TabPanel = ({ children, value, index }) => {
-  return (
-    <div hidden={value !== index}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-};
 
 const ManagerManagement = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -91,31 +79,11 @@ const ManagerManagement = () => {
   return (
     <Box sx={{ width: '100%' }}>
       
-      {/* 탭 메뉴 */}
-      <Box
-        sx={{
-          backgroundColor: '#fff',
-          py: 1,
-          px: 5,
-          boxShadow: 1,
-        }}
-      >
-        <Tabs
-          value={tabIndex}
-          onChange={handleTabChange}
-          textColor="primary"
-          indicatorColor="primary"
-          variant="standard" 
-          centered             
-          sx={{
-            minWidth: 'fit-content',  
-          }}
-        >
-          <Tab label="관리자 역할 구분" />
-          <Tab label="일정 등록 및 관리" />
-          <Tab label="공지사항 등록 및 관리" />
-        </Tabs>
-      </Box>
+      <TabbedContainer
+          tabIndex={tabIndex}
+          handleTabChange={handleTabChange}
+          labels={["관리자 역할 구분", "일정 등록 및 관리", "공지사항 등록 및 관리"]}
+        />
 
       {/* 회색 박스 본문 */}
       <Box
@@ -142,36 +110,17 @@ const ManagerManagement = () => {
             새 공지사항 등록
           </Button>
 
-          {/* 팝업 다이얼로그 */}
-          <Dialog open={open} onClose={() => setOpen(false)}>
-            <DialogTitle>공지사항 등록</DialogTitle>
-            <DialogContent>
-              <TextField
-                label="제목"
-                fullWidth
-                margin="normal"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-              />
-              <TextField
-                label="URL"
-                fullWidth
-                margin="normal"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-              />
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                <IconButton onClick={() => setIsPinned(prev => !prev)}>
-                  {isPinned ? <StarIcon color="primary" /> : <StarBorderIcon />}
-                </IconButton>
-                <Typography>{isPinned ? '대시보드에 노출됨' : '공지사항에 등록'}</Typography>
-              </Box>
-              <Box sx={{ mt: 2 }}>
-                <Button variant="contained" onClick={handleSubmit}>등록</Button>
-                <Button onClick={() => setOpen(false)} sx={{ ml: 1 }}>취소</Button>
-              </Box>
-            </DialogContent>
-          </Dialog>
+          <NoticeFormDialog
+            open={open}
+            title={title}
+            setTitle={setTitle}
+            url={url}
+            setUrl={setUrl}
+            isPinned={isPinned}
+            setIsPinned={setIsPinned}
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
           <TableContainer component={Paper}>
             <Table>
               <TableHead>

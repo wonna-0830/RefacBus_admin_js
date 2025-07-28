@@ -17,7 +17,7 @@ import {
 import "react-calendar/dist/Calendar.css";
 import { getDatabase, ref, push, get } from "firebase/database";
 import { getAuth } from "firebase/auth";
-import SharedCalendar from "../components/calendar/SharedCalendar";
+import SharedCalendar from "../calendar/SharedCalendar";
 
 const Manager_Schedule = () => {
   const [value, setValue] = useState(new Date());

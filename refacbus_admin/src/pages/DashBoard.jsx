@@ -6,7 +6,7 @@ import { Typography, List, ListItemButton, ListItemText, Paper } from '@mui/mate
 import { getDatabase, ref, onValue, get } from 'firebase/database';
 import SharedCalendar from "../components/calendar/SharedCalendar";
 import ScheduleCardBox from "../components/DashBoardSchedule/ScheduleCardBox"; 
-
+import NoticeList from '../components/Notice/NoticeList';
 
 const Dashboard = () => {
   const [value, setValue] = useState(new Date());
@@ -68,25 +68,7 @@ const Dashboard = () => {
         />
 
         {/* 공지사항 */}
-        <Box sx={{backgroundColor: '#fff', p: 2, borderRadius: 2,  boxShadow: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            공지사항
-          </Typography>
-          <List>
-            {notices.map((notice, index) => (
-              <ListItemButton
-                key={index}
-                component="a"
-                href={notice.url}
-                target="_blank"
-              >
-                <ListItemText
-                  primary={`${notice.title} (${new Date(notice.date).toLocaleDateString('ko-KR')})`}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-        </Box>
+        <NoticeList notices={notices} />
       </Box>
       <ScheduleCardBox />
     </Box>
