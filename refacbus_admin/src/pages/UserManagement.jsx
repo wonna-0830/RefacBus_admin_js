@@ -18,29 +18,39 @@ import SearchBar from '../components/common/SearchBar';
 
 
 const UserManagement = () => {
+  //검색 및 사용자 목록 상태
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
+  //context 메뉴 상태
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorUserId, setAnchorUserId] = useState(null);
 
+  //메모 다이얼로그
   const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [selectedUserForMemo, setSelectedUserForMemo] = useState(null);
   const [memoText, setMemoText] = useState("");
   const [isWarning, setIsWarning] = useState(false);
   const [isBan, setIsBan] = useState(false);
+
+  //메모 기록 확인
   const [isMemoHistoryOpen, setIsMemoHistoryOpen] = useState(false);
   const [selectedMemoList, setSelectedMemoList] = useState([]);
   const [memoFilter, setMemoFilter] = useState("all");
+
+  //사용자 정보 수정
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [editedEmail, setEditedEmail] = useState("");
   const [editedName, setEditedName] = useState("");
+
+  //비밀번호 초기화
   const [resetEmail, setResetEmail] = useState('');
   const [isResetOpen, setIsResetOpen] = useState(false);
   const [targetUser, setTargetUser] = useState(null);
 
+  //사용자 불러오기
   useEffect(() => {
     const fetchUsers = async () => {
       const snapshot = await get(ref(realtimeDb, "users"));
@@ -62,6 +72,8 @@ const UserManagement = () => {
     setFilteredUsers(filtered);
   }, [searchKeyword, allUsers]);
 
+
+  //context 메뉴 관련
   const handleMenuOpen = (event, user) => {
     setAnchorEl(event.currentTarget);
     setAnchorUserId(user.uid);
@@ -72,6 +84,7 @@ const UserManagement = () => {
     setAnchorUserId(null);
   };
 
+  //메모 다이얼로그
   const handleOpenMemo = (user) => {
     setSelectedUserForMemo(user);
     setIsMemoOpen(true);
@@ -133,7 +146,7 @@ const UserManagement = () => {
   };
 
 
-    const handleUnban = async (uid) => {
+  const handleUnban = async (uid) => {
     await update(ref(realtimeDb, `users/${uid}`), { isBanned: false });
 
     setAllUsers((prev) =>
@@ -146,6 +159,8 @@ const UserManagement = () => {
     handleMenuClose();
   };
 
+
+  //메모 히스토리 관련
   const handleOpenMemoHistory = async (user) => {
     const memoRef = ref(realtimeDb, `users/${user.uid}/memo`);
     const snapshot = await get(memoRef);
@@ -165,7 +180,7 @@ const UserManagement = () => {
     setIsMemoHistoryOpen(true);
   };
 
-
+  //사용자 정보 수정 관련
   const handleOpenEditDialog = (user) => {
     setEditingUser(user);
     setEditedEmail(user.email ?? "");
@@ -173,6 +188,7 @@ const UserManagement = () => {
     setIsEditDialogOpen(true);
   };
 
+  //비밀번호 초기화 관련
   const handleOpenReset = (user) => {
     setTargetUser(user);
     setResetEmail(user.email); 

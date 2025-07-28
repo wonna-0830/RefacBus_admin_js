@@ -19,266 +19,263 @@ import SearchBar from '../components/common/SearchBar';
 
 
 const PlaceTimeManagement = () => {
-    const [tabIndex, setTabIndex] = useState(0);
-    const [open, setOpen] = useState(false);
-    const [route, setRoute] = useState('');
-    const [routeName, setRouteName] = useState('');
-    const [isPinned, setIsPinned] = useState(false);
-    const [routeList, setRouteList] = useState([]);
-  
-    const handleTabChange = (event, newValue) => {
-      setTabIndex(newValue);
+
+  // 탭 관련
+  const [tabIndex, setTabIndex] = useState(0);
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
+  };
+
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [routeText, setRouteText] = useState("");
+  const [openRouteId, setOpenRouteId] = useState(null);
+
+  //노선 추가/수정 관련
+  const [open, setOpen] = useState(false);
+  const [routeName, setRouteName] = useState('');
+  const [isPinned, setIsPinned] = useState(false);
+  const [routeList, setRouteList] = useState([]);
+  const [selectedRouteInfo, setSelectedRouteInfo] = useState(null); 
+  const [editRouteText, setEditRouteText] = useState('');
+  const [openRouteDialog, setOpenRouteDialog] = useState(false);
+
+  //전체 노선 테이터 상태
+  const [filteredRoutes, setFilteredRoutes] = useState([]);
+  const [allRoutes, setAllRoutes] = useState([]);
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
+  //시간대 관련 상태
+  const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
+  const [selectedTimeInfo, setSelectedTimeInfo] = useState(null); 
+  const [openTimeDialog, setOpenTimeDialog] = useState(false);
+  const [editTimeText, setEditTimeText] = useState('');
+
+  //정류장 관련 상태
+  const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
+  const [openStopEditDialog, setOpenStopEditDialog] = useState(false);
+  const [selectedStopInfo, setSelectedStopInfo] = useState(null);
+  const [editStopText, setEditStopText] = useState('');
+
+  useEffect(() => {
+    const routeListRef = ref(realtimeDb, 'routes');
+    onValue(routeListRef, snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.entries(data).map(([id, item]) => ({
+          id,
+          ...item
+        }));
+        list.sort((a, b) => b.isPinned - a.isPinned);
+        setRouteList(list);
+      } else {
+        setRouteList([]);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+    const snapshot = await get(ref(realtimeDb, "routes"));
+    const routesData = snapshot.val();
+    const routesArray = Object.entries(routesData).map(([uid, value]) => ({
+      uid,
+      ...value,
+    }));
+    const pinnedRoutes = routesArray.filter(route => route.isPinned);
+    setAllRoutes(pinnedRoutes);
+    setFilteredRoutes(pinnedRoutes);
+    };
+    fetchRoutes();
+  }, []);
+
+  useEffect(() => {
+    const filtered = allRoutes.filter((route) =>
+      (route.name ?? '').toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+    setFilteredRoutes(filtered);
+  }, [searchKeyword, allRoutes]);
+    
+
+  const [route, setRoute] = useState('');
+  const handleAddRoute = () => {
+    const newRoute = {
+      name: routeName,
+      isPinned,
+      date: new Date().toISOString(),
+      writer: '관리자',
     };
   
-    const handleAddRoute = () => {
-      const newRoute = {
-        name: routeName,
-        isPinned,
-        date: new Date().toISOString(),
-        writer: '관리자',
-      };
-  
-      const newRef = push(ref(realtimeDb, 'routes'));
-      set(newRef, newRoute);
-  
-      setOpen(false);
-      setRoute('');
-      setIsPinned(false);
-    };
-  
-    useEffect(() => {
-      const routeListRef = ref(realtimeDb, 'routes');
-      onValue(routeListRef, snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          const list = Object.entries(data).map(([id, item]) => ({
-            id,
-            ...item
-          }));
-          list.sort((a, b) => b.isPinned - a.isPinned);
-          setRouteList(list);
-        } else {
-          setRouteList([]);
-        }
-      });
-    }, []);
-  
-    const togglePinned = (id, currentState) => {
+    const newRef = push(ref(realtimeDb, 'routes'));
+    set(newRef, newRoute);
+
+    setOpen(false);
+    setRoute('');
+    setIsPinned(false);
+  };
+
+  const togglePinned = (id, currentState) => {
     const routeRef = ref(realtimeDb, `routes/${id}`);
     update(routeRef, { isPinned: !currentState });
-    };
+  };
 
-    const [searchKeyword, setSearchKeyword] = useState('');
-    const [filteredRoutes, setFilteredRoutes] = useState([]);
-    const [allRoutes, setAllRoutes] = useState([]);
-    const [selectedRoute, setSelectedRoute] = useState(null);
-    const [routeText, setRouteText] = useState("");
-    const [openRouteId, setOpenRouteId] = useState(null);
-    const [isTimeDialogOpen, setIsTimeDialogOpen] = useState(false);
-  const [isStopDialogOpen, setIsStopDialogOpen] = useState(false);
+  const handleTimeOpen = (route) => {
+    setSelectedRoute(route);
+    setTimeout(() => setIsTimeDialogOpen(true), 0);
+  };
 
+  const handleStopOpen = (route) => {
+    console.log("🧪 handleStopOpen에서 받은 route:", route);
+    setSelectedRoute(route);
+    setTimeout(() => setIsStopDialogOpen(true), 0);
+  };
 
-      useEffect(() => {
-        const fetchRoutes = async () => {
-          const snapshot = await get(ref(realtimeDb, "routes"));
-          const routesData = snapshot.val();
-          const routesArray = Object.entries(routesData).map(([uid, value]) => ({
-            uid,
-            ...value,
-          }));
-          const pinnedRoutes = routesArray.filter(route => route.isPinned);
-          setAllRoutes(pinnedRoutes);
-          setFilteredRoutes(pinnedRoutes);
-        };
-        fetchRoutes();
-      }, []);
-    
-      useEffect(() => {
-        const filtered = allRoutes.filter((route) =>
-          (route.name ?? '').toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-        setFilteredRoutes(filtered);
-      }, [searchKeyword, allRoutes]);
-    
-      const handleTimeOpen = (route) => {
-        setSelectedRoute(route);
-        // 상태 설정 후 다음 프레임에서 실행
-        setTimeout(() => setIsTimeDialogOpen(true), 0);
-      };
+  const updateRoutes = (key, value) => {
+    setAllRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === selectedRoute.uid ? { ...route, [key]: value } : route
+      )
+    );
+    setFilteredRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === selectedRoute.uid ? { ...route, [key]: value } : route
+      )
+    );
+  };
 
-      const updateRoutes = (key, value) => {
-        setAllRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === selectedRoute.uid ? { ...route, [key]: value } : route
-          )
-        );
-        setFilteredRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === selectedRoute.uid ? { ...route, [key]: value } : route
-          )
-        );
-      };
-      
-      const handleSubmitTime = async () => {
-        if (!selectedRoute || !routeText.trim()) return;
-        const dataRef = ref(realtimeDb, `routes/${selectedRoute.uid}/times`);
-        await push(dataRef, routeText.trim());
+  const handleSubmitTime = async () => {
+    if (!selectedRoute || !routeText.trim()) return;
+    const dataRef = ref(realtimeDb, `routes/${selectedRoute.uid}/times`);
+    await push(dataRef, routeText.trim());
 
-        const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRoute.uid}`));
-        const updatedData = updatedSnapshot.val();
+    const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRoute.uid}`));
+    const updatedData = updatedSnapshot.val();
         
 
-        updateRoutes('times', updatedData.times);
-        setIsTimeDialogOpen(false);
-        setRouteText('');
-        setSelectedRoute(null);
-      };
+    updateRoutes('times', updatedData.times);
+    setIsTimeDialogOpen(false);
+    setRouteText('');
+    setSelectedRoute(null);
+  };
 
-      const handleSubmitStop = async () => {
-        if (!selectedRoute || !routeText.trim()) return;
-        const dataRef = ref(realtimeDb, `routes/${selectedRoute.uid}/stops`);
-        await push(dataRef, routeText.trim());
+  const handleUpdateTime = async () => {
+    if (!selectedTimeInfo) return;
+    const { routeId, timeId } = selectedTimeInfo;
+    await set(ref(realtimeDb, `routes/${routeId}/times/${timeId}`), editTimeText); 
 
-        const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRoute.uid}`));
-        const updatedData = updatedSnapshot.val();
+    const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
+    const updatedData = updatedSnapshot.val();
 
-        updateRoutes('stops', updatedData.stops);
-        setIsStopDialogOpen(false);
-        setRouteText('');
-        setSelectedRoute(null);
-      };
+    setAllRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, times: updatedData.times } : route
+      )
+    );
+    setFilteredRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, times: updatedData.times } : route
+      )
+    );
+    setOpenTimeDialog(false);
+  };
 
-      
-      const handleUpdateTime = async () => {
-        if (!selectedTimeInfo) return;
-        const { routeId, timeId } = selectedTimeInfo;
-        await set(ref(realtimeDb, `routes/${routeId}/times/${timeId}`), editTimeText); 
+  const handleDeleteTime = async () => {
+    if (!selectedTimeInfo) return;
+    const { routeId, timeId } = selectedTimeInfo;
 
-        const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
-        const updatedData = updatedSnapshot.val();
+    await update(ref(realtimeDb, `routes/${routeId}/times`), {
+      [timeId]: null
+    });
 
-        setAllRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, times: updatedData.times } : route
-          )
-        );
-        setFilteredRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, times: updatedData.times } : route
-          )
-        );
-        setOpenTimeDialog(false);
-      };
+    const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
+    const updatedData = snapshot.val()
 
-      const handleDeleteTime = async () => {
-        if (!selectedTimeInfo) return;
-        const { routeId, timeId } = selectedTimeInfo;
+    setAllRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, times: updatedData.times } : route
+      )
+    );
+    setFilteredRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, times: updatedData.times } : route
+      )
+    )
+    setOpenTimeDialog(false);
+  };
 
-        await update(ref(realtimeDb, `routes/${routeId}/times`), {
-          [timeId]: null
-        });
+  const handleSubmitStop = async () => {
+    if (!selectedRoute || !routeText.trim()) return;
+    const dataRef = ref(realtimeDb, `routes/${selectedRoute.uid}/stops`);
+    await push(dataRef, routeText.trim());
 
-        const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
-        const updatedData = snapshot.val();
+    const updatedSnapshot = await get(ref(realtimeDb, `routes/${selectedRoute.uid}`));
+    const updatedData = updatedSnapshot.val();
 
-        setAllRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, times: updatedData.times } : route
-          )
-        );
-        setFilteredRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, times: updatedData.times } : route
-          )
-        );
+    updateRoutes('stops', updatedData.stops);
+    setIsStopDialogOpen(false);
+    setRouteText('');
+    setSelectedRoute(null);
+  };
 
-        setOpenTimeDialog(false);
-      };
+  const handleUpdateStop = async () => {
+    if (!selectedStopInfo) return;
+    const { routeId, stopId } = selectedStopInfo;
 
-      const handleUpdateStop = async () => {
-        if (!selectedStopInfo) return;
-        const { routeId, stopId } = selectedStopInfo;
+    await set(ref(realtimeDb, `routes/${routeId}/stops/${stopId}`), editStopText);
 
-        await set(ref(realtimeDb, `routes/${routeId}/stops/${stopId}`), editStopText);
+    const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
+    const updatedData = snapshot.val();
 
-        const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
-        const updatedData = snapshot.val();
+    setAllRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+      )
+    );
+    setFilteredRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+      )
+    );
 
-        setAllRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, stops: updatedData.stops } : route
-          )
-        );
-        setFilteredRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, stops: updatedData.stops } : route
-          )
-        );
+    setOpenStopEditDialog(false);
+  };
 
-        setOpenStopEditDialog(false);
-      };
+  const handleDeleteStop = async () => {
+    if (!selectedStopInfo) return;
+    const { routeId, stopId } = selectedStopInfo;
 
-      const handleDeleteStop = async () => {
-        if (!selectedStopInfo) return;
-        const { routeId, stopId } = selectedStopInfo;
+    await update(ref(realtimeDb, `routes/${routeId}/stops`), {
+      [stopId]: null
+    });
 
-        await update(ref(realtimeDb, `routes/${routeId}/stops`), {
-          [stopId]: null
-        });
+    const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
+    const updatedData = snapshot.val();
 
-        const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
-        const updatedData = snapshot.val();
+    setAllRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+      )
+    );
+    setFilteredRoutes((prev) =>
+      prev.map((route) =>
+        route.uid === routeId ? { ...route, stops: updatedData.stops } : route
+      )
+    );
 
-        setAllRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, stops: updatedData.stops } : route
-          )
-        );
-        setFilteredRoutes((prev) =>
-          prev.map((route) =>
-            route.uid === routeId ? { ...route, stops: updatedData.stops } : route
-          )
-        );
+    setOpenStopEditDialog(false);
+  };
 
-        setOpenStopEditDialog(false);
-      };
+  const handleEditTimeClick = (routeId, timeId, timeValue) => {
+    setSelectedTimeInfo({ routeId, itemId: timeId, value: timeValue });
+    setEditTimeText(timeValue);
+    setOpenTimeDialog(true);
+  };
 
-
-      const [selectedTimeInfo, setSelectedTimeInfo] = useState(null); 
-      const [openTimeDialog, setOpenTimeDialog] = useState(false);
-      const [editTimeText, setEditTimeText] = useState('');
-
-      
-      const [openStopEditDialog, setOpenStopEditDialog] = useState(false);
-      const [selectedStopInfo, setSelectedStopInfo] = useState(null);
-      const [editStopText, setEditStopText] = useState('');
-
-
-      const handleStopOpen = (route) => {
-        console.log("🧪 handleStopOpen에서 받은 route:", route);
-        setSelectedRoute(route);
-        // 상태 설정 후 다음 프레임에서 실행
-        setTimeout(() => setIsStopDialogOpen(true), 0);
-      };
-
-
-      const [selectedRouteInfo, setSelectedRouteInfo] = useState(null); 
-      const [editRouteText, setEditRouteText] = useState('');
-      const [openRouteDialog, setOpenRouteDialog] = useState(false);
-
-      const handleEditTimeClick = (routeId, timeId, timeValue) => {
-        setSelectedTimeInfo({ routeId, itemId: timeId, value: timeValue });
-        setEditTimeText(timeValue);
-        setOpenTimeDialog(true);
-      };
-
-      const handleEditStopClick = (routeId, stopId, stopName) => {
-        setSelectedStopInfo({ routeId, itemId: stopId, value: stopName });
-        setEditStopText(stopName);
-        setOpenStopEditDialog(true);
-      };
-
-    
+  const handleEditStopClick = (routeId, stopId, stopName) => {
+    setSelectedStopInfo({ routeId, itemId: stopId, value: stopName });
+    setEditStopText(stopName);
+    setOpenStopEditDialog(true);
+  };
+  
 
   return (
     <Box sx={{ width: '100%' }}>

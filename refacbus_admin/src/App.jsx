@@ -28,6 +28,7 @@ function App() {
         <Route path="/driver-management" element={<DriverManagement />} />
         <Route path="/manager-management" element={<ManagerManagement />} />
         <Route path="/dashboard" element={<DashBoard />} />
+        <Route path="/Login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   )

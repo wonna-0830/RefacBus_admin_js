@@ -13,30 +13,19 @@ import SearchBar from '../components/common/SearchBar';
 
 const ReservationManagement = () => {
   const [tabIndex, setTabIndex] = useState(0);
+  const handleTabChange = (event, newValue) => setTabIndex(newValue);
 
-  const handleTabChange = (event, newValue) => {
-    setTabIndex(newValue);
-  };
-
+  // -------------------- 🔹 [2] 날짜별 예약자 목록 --------------------
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [reservationList, setReservationList] = useState([]); // 조회된 전체 예약 목록
-  const [filteredData, setFilteredData] = useState([]); // 검색어 포함 필터링된 목록
+  const [reservationList, setReservationList] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
-  const handleYearChange = (event) => {
-    setYear(event.target.value);
-  };
-
-  const handleMonthChange = (event) => {
-    setMonth(event.target.value);
-  };
-
-  const handleDayChange = (event) => {
-    setDay(event.target.value);
-  };
-
+  const handleYearChange = (e) => setYear(e.target.value);
+  const handleMonthChange = (e) => setMonth(e.target.value);
+  const handleDayChange = (e) => setDay(e.target.value);
 
   const handleSearch = async () => {
     if (!year || !month || !day) {
@@ -44,10 +33,9 @@ const ReservationManagement = () => {
       return;
     }
 
-    const targetDate = `${year.slice(2)}-${month}-${day}`; // 예: "2025-07-15"
+    const targetDate = `${year.slice(2)}-${month}-${day}`;
     const db = getDatabase();
     const usersRef = ref(db, 'users');
-
 
     try {
       const snapshot = await get(usersRef);
@@ -57,7 +45,6 @@ const ReservationManagement = () => {
 
         Object.entries(usersData).forEach(([uid, userInfo]) => {
           const { name, email, reservations } = userInfo;
-
           if (reservations) {
             Object.values(reservations).forEach((res) => {
               if (res.date === targetDate) {
@@ -66,14 +53,13 @@ const ReservationManagement = () => {
                   email,
                   route: res.route || '',
                   time: res.time || '',
-                  canceled: false // 현재 구조엔 취소 여부가 없으므로 기본 false 처리
+                  canceled: false
                 });
               }
             });
           }
         });
 
-        // 이름 검색어 필터
         if (searchKeyword.trim() !== '') {
           resultList = resultList.filter(item =>
             item.name.includes(searchKeyword.trim())
@@ -92,15 +78,24 @@ const ReservationManagement = () => {
     }
   };
 
-  const [filteredRouteStats, setFilteredRouteStats] = useState([]);
+  // -------------------- 🔹 [3] 예약 통계 --------------------
+  const [statType, setStatType] = useState('routeTotal');
+  const [filterValue, setFilterValue] = useState('');
   const [chartYear, setChartYear] = useState('');
   const [chartMonth, setChartMonth] = useState('');
   const [chartDay, setChartDay] = useState('');
+  const [selectedRoute, setSelectedRoute] = useState('');
+  const [routeList, setRouteList] = useState([]);
+  const [filteredRouteStats, setFilteredRouteStats] = useState([]);
 
+  const handleStatTypeChange = (e) => {
+    const selectedType = e.target.value;
+    setStatType(selectedType);
+    setFilterValue('');
+  };
   const handleChartYearChange = (e) => setChartYear(e.target.value);
   const handleChartMonthChange = (e) => setChartMonth(e.target.value);
   const handleChartDayChange = (e) => setChartDay(e.target.value);
-
 
   const handleChartSearch = async () => {
     const db = getDatabase();
@@ -110,14 +105,13 @@ const ReservationManagement = () => {
 
     const usersData = snapshot.val();
     const counts = {};
-
-    // 필터 값 직접 계산
     let dynamicFilter = '';
+
     if (statType === 'route') {
       const shortYear = chartYear ? chartYear.slice(2) : '';
       dynamicFilter = [shortYear, chartMonth, chartDay].filter(Boolean).join('-');
     } else if (statType === 'station' || statType === 'time') {
-      dynamicFilter = selectedRoute; // 노선 이름 기반
+      dynamicFilter = selectedRoute;
     }
 
     Object.values(usersData).forEach(user => {
@@ -146,19 +140,11 @@ const ReservationManagement = () => {
     setFilteredRouteStats(data);
   };
 
- 
-  const [statType, setStatType] = useState('routeTotal');
-
-   useEffect(() => {
-  // 탭이 열릴 때 최초 한 번만 실행
+  useEffect(() => {
     if (statType === 'routeTotal') {
       handleChartSearch();
     }
   }, [statType]);
-
-  const [filterValue, setFilterValue] = useState(''); // 날짜 or 노선명 등
-  const [selectedRoute, setSelectedRoute] = useState('');
-  const [routeList, setRouteList] = useState([]);
 
   useEffect(() => {
     const fetchRouteNames = async () => {
@@ -167,26 +153,26 @@ const ReservationManagement = () => {
       const snapshot = await get(routeRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const routeNames = Object.values(data)
-          .map((route) => route.name)
-          .filter(Boolean); // name이 undefined/null인 경우 제외
-        setRouteList(routeNames);
+        const names = Object.values(data).map((r) => r.name).filter(Boolean);
+        setRouteList(names);
       }
     };
-
     fetchRouteNames();
   }, []);
 
-  const handleStatTypeChange = (e) => {
-    const selectedType = e.target.value;
-    setStatType(selectedType);
-    setFilterValue(''); // 유형이 바뀌면 필터 초기화
-  };
-
+  // -------------------- 🔹 [4] 예약 취소 통계 --------------------
   const [allDeletedReservations, setAllDeletedReservations] = useState([]);
-  const [deleteType, setDeleteType] = useState("routeTotal"); // 기본값은 "route"
+  const [deleteType, setDeleteType] = useState("routeTotal");
   const [filteredRouteDeletes, setFilteredRouteDeletes] = useState([]);
+  const [deleteYear, setDeleteYear] = useState('');
+  const [deleteMonth, setDeleteMonth] = useState('');
+  const [deleteDay, setDeleteDay] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
 
+  const handleDeleteChange = (e) => setDeleteType(e.target.value);
+  const handleDeleteYearChange = (e) => setDeleteYear(e.target.value);
+  const handleDeleteMonthChange = (e) => setDeleteMonth(e.target.value);
+  const handleDeleteDayChange = (e) => setDeleteDay(e.target.value);
 
   useEffect(() => {
     const db = getDatabase();
@@ -211,70 +197,44 @@ const ReservationManagement = () => {
       setAllDeletedReservations(all);
     });
   }, []);
-  
-
-
-  const [deleteYear, setDeleteYear] = useState('');
-  const [deleteMonth, setDeleteMonth] = useState('');
-  const [deleteDay, setDeleteDay] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-
-  const handleDeleteYearChange = (e) => setDeleteYear(e.target.value);
-  const handleDeleteMonthChange = (e) => setDeleteMonth(e.target.value);
-  const handleDeleteDayChange = (e) => setDeleteDay(e.target.value);
-
-  const handleDeleteChange = (event) => {
-    setDeleteType(event.target.value);
-    
-  };
 
   const handleDeleteSearch = () => {
-    let result = [];
-
     const formatDate = (dateStr) => {
-      // 예: 25-07-21 → 2025-07-21
       const [yy, mm, dd] = dateStr.split("-");
       return `20${yy}-${mm}-${dd}`;
     };
 
     const filtered = allDeletedReservations.filter((r) => {
       if (!r.date) return false;
-
-      const fullDate = formatDate(r.date); // "2025-07-21"
-      const [year, month, day] = fullDate.split("-");
-
-      const match =
-        (!deleteYear || year === deleteYear) &&
-        (!deleteMonth || month === deleteMonth) &&
-        (!deleteDay || day === deleteDay);
-
-      return match;
+      const fullDate = formatDate(r.date);
+      const [y, m, d] = fullDate.split("-");
+      return (
+        (!deleteYear || y === deleteYear) &&
+        (!deleteMonth || m === deleteMonth) &&
+        (!deleteDay || d === deleteDay)
+      );
     });
 
+    let result = [];
 
     if (deleteType === "route") {
-      // 날짜별 취소 노선 수 (필터 반영된 데이터 사용)
       const grouped = {};
       filtered.forEach((r) => {
-        const key = `${r.route}`;
-        grouped[key] = (grouped[key] || 0) + 1;
+        grouped[r.route] = (grouped[r.route] || 0) + 1;
       });
       result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
     }
 
     if (deleteType === "time") {
       const grouped = {};
-
       allDeletedReservations
         .filter((r) => selectedTime === "" || r.route === selectedTime)
         .forEach((r) => {
           const key = r.time;
           grouped[key] = (grouped[key] || 0) + 1;
         });
-
-        result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
-      }
-
+      result = Object.entries(grouped).map(([name, count]) => ({ name, count }));
+    }
 
     if (deleteType === "routeTotal") {
       const grouped = {};
@@ -298,7 +258,7 @@ const ReservationManagement = () => {
 
     setFilteredRouteDeletes(result);
   };
-
+  
   return (
     <Box sx={{ width: '100%' }}>
       
