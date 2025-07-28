@@ -16,6 +16,8 @@ export default function Register() {
   const [isKoreanId, setIsKoreanId] = useState(false);
   const [isEnglishName, setIsEnglishName] = useState(false);
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const auth = getAuth(app);
 
@@ -46,43 +48,47 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    if (!id || !password || !name || !code) {
-      alert("모든 항목을 입력해주세요!");
-      
+  if (!id || !password || !name || !code) {
+    alert("모든 항목을 입력해주세요!");
+    return;
+  }
+
+  try {
+    // ✅ 관리자 코드 확인 (Firestore에서 가져오기)
+    const docRef = doc(firestoreDb, "admin_code", "admin_key");
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      alert("관리자 코드 정보가 없습니다.");
       return;
     }
-    
 
-    try {
-      const docRef = doc(firestoreDb, "admin_code", "admin_key");
-      const docSnap = await getDoc(docRef);
-
-      if (!docSnap.exists()) {
-        alert("관리자 코드 정보가 없습니다.");
-        return;
-      }
-
-      const savedCode = docSnap.data().code;
+    const savedCode = docSnap.data().code;
       if (code !== savedCode) {
         alert("관리자 코드가 올바르지 않습니다.");
         return;
       }
 
-      const email = `${id}@example.com`;
+      // email 생성 (이메일 형식 자동 보정)
+      const trimmedId = id.trim();
+      const email = trimmedId.includes('@') ? trimmedId : `${trimmedId}@gmail.com`;
 
+      // Firebase Auth 회원가입
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
+      // Realtime Database에 관리자 정보 저장
       await set(ref(realtimeDb, `admin/${uid}`), {
-        id,
-        name,
-        createdAt: new Date().toISOString(),
+        email,
+        name: name.trim(),
+        joinDate: new Date().toISOString(),
       });
 
       alert("회원가입 성공!");
       navigate("/");
     } catch (error) {
-        if (error.code === "auth/email-already-in-use") {
+      // 에러 메시지 처리
+      if (error.code === "auth/email-already-in-use") {
         setErrorMessage("이미 등록된 이메일입니다. 로그인하거나 다른 이메일을 사용해주세요.");
       } else if (error.code === "auth/invalid-email") {
         setErrorMessage("이메일 형식이 올바르지 않습니다.");

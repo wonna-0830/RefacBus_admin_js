@@ -23,7 +23,8 @@ const UserTable = ({
   onUnban,
   onReset,
   onEdit,
-  onMemoHistory
+  onMemoHistory,
+  onRoleClick 
 }) => {
   return (
     <Table>
@@ -45,7 +46,7 @@ const UserTable = ({
             <TableCell>{user.uid}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.name}</TableCell>
-            <TableCell>{user.joinDate}</TableCell>
+            <TableCell>{user.joinDate ? user.joinDate.split("T")[0] : "-"}</TableCell>
             <TableCell>{user.warningCount ?? 0}</TableCell>
             <TableCell>{user.isBanned ? "정지됨" : "X"}</TableCell>
 
@@ -62,6 +63,9 @@ const UserTable = ({
                 <MenuItem onClick={() => { onReset(user); onMenuClose(); }}>비밀번호 초기화</MenuItem>
                 <MenuItem onClick={() => { onEdit(user); onMenuClose(); }}>회원 수정</MenuItem>
                 <MenuItem onClick={() => { onMemoHistory(user); onMenuClose(); }}>메모 보기</MenuItem>
+                {type === "admin" && user.name !== "박정원" && (
+                  <MenuItem onClick={() => { onRoleClick(user); onMenuClose(); }}>권한 설정</MenuItem>
+                )}
               </Menu>
             </TableCell>
 

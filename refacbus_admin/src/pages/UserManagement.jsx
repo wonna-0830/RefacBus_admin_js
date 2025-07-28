@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  TextField, Box, Table, TableHead, TableCell, TableRow, TableBody,
-  Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions,
-  Checkbox, FormControlLabel, Button, Typography, Paper
-} from '@mui/material';
+import {  Box, Typography } from '@mui/material';
 import { ref, get, update, push, set } from "firebase/database";
 import { realtimeDb, auth } from "../firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -14,10 +10,14 @@ import MemoHistoryDialog from '../components/User/MemoHistoryDialog';
 import UserEditDialog from '../components/User/UserEditDialog';
 import PasswordResetDialog from '../components/User/PasswordResetDialog';
 import SearchBar from '../components/common/SearchBar';
+import { useAdmin } from '../context/AdminContext';
+import { hasPermission } from '../utils/permissionUtil';
 
 
 
 const UserManagement = () => {
+  const admin = useAdmin();
+    if (!admin) return null;
   //검색 및 사용자 목록 상태
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -206,6 +206,7 @@ const UserManagement = () => {
   };
 
   return (
+    hasPermission(admin, '회원 관리') ? (
     <Box sx={{ width: '100%', backgroundColor: '#fff', padding: 2 }}>
       <SearchBar
         value={searchKeyword}
@@ -275,6 +276,9 @@ const UserManagement = () => {
         onClose={() => setIsResetOpen(false)}
       />
     </Box>
+    ) : (
+    <Typography color="error">이 기능에 대한 권한이 없습니다.</Typography>
+  )
   );
 };
 
