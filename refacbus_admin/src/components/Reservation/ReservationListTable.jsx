@@ -16,8 +16,9 @@ const ReservationListTable = ({ data = [] }) => {
         <Typography sx={{ width: 200, fontWeight: 'bold' }}>이메일</Typography>
         <Typography sx={{ width: 200, fontWeight: 'bold' }}>이름</Typography>
         <Typography sx={{ width: 200, fontWeight: 'bold' }}>노선</Typography>
-        <Typography sx={{ width: 200, fontWeight: 'bold' }}>출발 시간</Typography>
-        <Typography sx={{ width: 200, fontWeight: 'bold' }}>취소 여부</Typography>
+        <Typography sx={{ width: 150, fontWeight: 'bold' }}>예약 날짜</Typography>
+        <Typography sx={{ width: 150, fontWeight: 'bold' }}>출발 시간</Typography>
+        <Typography sx={{ width: 100, fontWeight: 'bold' }}>취소 여부</Typography>
       </Box>
 
       {data.length > 0 ? (
@@ -33,8 +34,9 @@ const ReservationListTable = ({ data = [] }) => {
             <Typography sx={{ width: 200 }}>{item.email}</Typography>
             <Typography sx={{ width: 200 }}>{item.name}</Typography>
             <Typography sx={{ width: 200 }}>{item.route}</Typography>
-            <Typography sx={{ width: 200 }}>{item.time}</Typography>
-            <Typography sx={{ width: 200 }}>
+            <Typography sx={{ width: 150 }}>{item.date}</Typography>
+            <Typography sx={{ width: 150 }}>{item.time}</Typography>
+            <Typography sx={{ width: 100 }}>
               {item.canceled ? '취소됨' : '예약 중'}
             </Typography>
           </Box>

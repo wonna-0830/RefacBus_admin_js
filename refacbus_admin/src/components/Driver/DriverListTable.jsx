@@ -25,7 +25,7 @@ const DriverListTable = ({
           <TableCell>아이디</TableCell>
           <TableCell>이름</TableCell>
           <TableCell>가입 날짜</TableCell>
-          <TableCell>운행 시간 관리</TableCell>
+          <TableCell>운행 이력</TableCell>
           <TableCell>운행 일정 관리</TableCell>
         </TableRow>
       </TableHead>

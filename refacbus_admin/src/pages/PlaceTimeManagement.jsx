@@ -112,7 +112,7 @@ const PlaceTimeManagement = () => {
     set(newRef, newRoute);
 
     setOpen(false);
-    setRoute('');
+    setRouteName('');
     setIsPinned(false);
   };
 
@@ -167,6 +167,7 @@ const PlaceTimeManagement = () => {
 
     const updatedSnapshot = await get(ref(realtimeDb, `routes/${routeId}`));
     const updatedData = updatedSnapshot.val();
+    console.log("✏️ 수정 시도:", selectedTimeInfo, editTimeText);
 
     setAllRoutes((prev) =>
       prev.map((route) =>
@@ -227,7 +228,7 @@ const PlaceTimeManagement = () => {
 
     const snapshot = await get(ref(realtimeDb, `routes/${routeId}`));
     const updatedData = snapshot.val();
-
+    console.log("✏️ 수정 시도:", selectedStopInfo, editStopText);
     setAllRoutes((prev) =>
       prev.map((route) =>
         route.uid === routeId ? { ...route, stops: updatedData.stops } : route
@@ -268,13 +269,15 @@ const PlaceTimeManagement = () => {
   };
 
   const handleEditTimeClick = (routeId, timeId, timeValue) => {
-    setSelectedTimeInfo({ routeId, itemId: timeId, value: timeValue });
+    console.log("🛠️ 수정 클릭:", routeId, timeId, timeValue);
+    setSelectedTimeInfo({ routeId, timeId, value: timeValue });
     setEditTimeText(timeValue);
     setOpenTimeDialog(true);
   };
 
   const handleEditStopClick = (routeId, stopId, stopName) => {
-    setSelectedStopInfo({ routeId, itemId: stopId, value: stopName });
+    console.log("🛠️ 수정 클릭:", routeId, stopId, stopName);
+    setSelectedStopInfo({ routeId, stopId, value: stopName });
     setEditStopText(stopName);
     setOpenStopEditDialog(true);
   };

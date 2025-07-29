@@ -16,8 +16,11 @@ import DriveNoteIcon from '@mui/icons-material/EventNote';
 import ManagerIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom"; 
+import { useEffect, useState } from 'react';
+import { ref, get } from "firebase/database";
+import { auth, realtimeDb } from "../firebase";
+
 const drawerWidth = 240;
 
 const Sidebar = ({ onMenuSelect }) => {
@@ -33,6 +36,24 @@ const Sidebar = ({ onMenuSelect }) => {
       alert("로그아웃에 실패했습니다.");
     }
   };
+
+  const [adminName, setAdminName] = useState('');
+
+useEffect(() => {
+  const fetchAdminName = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    const snapshot = await get(ref(realtimeDb, `admin/${uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      setAdminName(data.name);
+    }
+  };
+
+  fetchAdminName();
+}, []);
+
 
   return (
     <Drawer
@@ -89,6 +110,12 @@ const Sidebar = ({ onMenuSelect }) => {
           <ListItemIcon sx={{ color: 'white' }}><LogoutIcon /></ListItemIcon>
           <ListItemText primary="로그아웃" />
         </ListItemButton>
+        <Typography 
+          variant="body2" 
+          sx={{ color: 'white', ml: 2, mt: 1 }}
+        >
+          관리자: {adminName || "불러오는 중..."}
+        </Typography>
       </List>
     </Drawer>
   );

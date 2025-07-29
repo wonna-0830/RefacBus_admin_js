@@ -17,7 +17,23 @@ const ReservationManagement = () => {
   const admin = useAdmin();
     if (!admin) return null;
   const [tabIndex, setTabIndex] = useState(0);
+
   const handleTabChange = (event, newValue) => setTabIndex(newValue);
+  
+  useEffect(() => {
+    if (tabIndex === 0) {
+      if (year && month && day) {
+        handleSearch(); // 자동 조회 옵션
+      }
+    } else {
+      setYear('');
+      setMonth('');
+      setDay('');
+      setSearchKeyword('');
+      setReservationList([]);
+      setFilteredData([]);
+    }
+  }, [tabIndex]);
 
   //날짜별 예약자 목록
   const [year, setYear] = useState('');
@@ -81,6 +97,50 @@ const ReservationManagement = () => {
       alert('예약 데이터를 불러오는 중 오류가 발생했습니다.');
     }
   };
+
+  const fetchAllReservations = async () => {
+    const db = getDatabase();
+    const usersRef = ref(db, 'users');
+
+    try {
+      const snapshot = await get(usersRef);
+      if (snapshot.exists()) {
+        const usersData = snapshot.val();
+        let resultList = [];
+
+        Object.entries(usersData).forEach(([uid, userInfo]) => {
+          const { name, email, reservations } = userInfo;
+          if (reservations) {
+            Object.values(reservations).forEach((res) => {
+              resultList.push({
+                name,
+                email,
+                route: res.route || '',
+                time: res.time || '',
+                canceled: res.deleted ?? false,
+                date: res.date || ''
+              });
+            });
+          }
+        });
+
+        setReservationList(resultList);
+        setFilteredData(resultList);
+      } else {
+        setReservationList([]);
+        setFilteredData([]);
+      }
+    } catch (error) {
+      console.error('전체 예약 데이터를 불러오는 중 오류:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchAllReservations();
+  }, []);
+
+
 
   //예약 통계
   const [statType, setStatType] = useState('routeTotal');
