@@ -7,7 +7,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import RouteCard from "./RouteCard"; // 경로 카드 공통 컴포넌트
 
-const RouteExpandableTable = ({
+const TimeStopTable = ({
   filteredRoutes,
   openRouteId,
   setOpenRouteId,
@@ -64,9 +64,7 @@ const RouteExpandableTable = ({
                     <RouteCard
                       items={items}
                       onClickItem={(itemId, value) => {
-                        setSelectedInfo({ routeId: route.uid, itemId, value });
-                        setEditText(value);
-                        setOpenEditDialog(true);
+                        onItemClick(route.uid, itemId, value);
                       }}
                       color={cardColor}
                       emptyMessage={`등록된 ${itemLabel}이 없습니다`}
@@ -82,4 +80,4 @@ const RouteExpandableTable = ({
   );
 };
 
-export default RouteExpandableTable;
+export default TimeStopTable;
