@@ -2,24 +2,17 @@
 import React from "react";
 import Calendar from "react-calendar";
 import Paper from "@mui/material/Paper";
-import "./SharedCalendar.css"; 
+import "./SharedCalendar.css";
+import dayjs from "dayjs";
 
-
-const SharedCalendar = ({ value, onChange, markedDates = [] }) => {
+const SharedCalendar = ({ value, onChange, markedDates = [], onMonthChange }) => {
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const dateStr = `${year}-${month}-${day}`;
-
-      if (markedDates.includes(dateStr)) {
-        return "highlight";
-      }
+      const formatted = dayjs(date).format("YYYY-MM-DD");
+      return markedDates.includes(formatted) ? "highlight" : null;
     }
     return null;
   };
-
 
   return (
     <Paper
@@ -41,6 +34,12 @@ const SharedCalendar = ({ value, onChange, markedDates = [] }) => {
         value={value}
         className="custom-calendar"
         tileClassName={tileClassName}
+        onActiveStartDateChange={({ activeStartDate }) => {
+          const newMonth = activeStartDate.getMonth() + 1;
+          const newYear = activeStartDate.getFullYear();
+          const newMonthStr = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+          onMonthChange?.(newMonthStr); // 부모에서 이걸 받아서 setValue에 반영
+        }}
       />
     </Paper>
   );

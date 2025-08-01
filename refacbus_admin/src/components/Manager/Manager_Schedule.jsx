@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import "react-calendar/dist/Calendar.css";
-import { getDatabase, ref, push, get } from "firebase/database";
+import { getDatabase, ref, set, get } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import SharedCalendar from "../calendar/SharedCalendar";
 
@@ -41,18 +41,18 @@ const Manager_Schedule = () => {
         const uniqueDates = new Set();
         const scheduleList = [];
 
-        for (const date of Object.keys(data)) {
-          const entries = Object.values(data[date]);
-          if (entries.length > 0) {
-            uniqueDates.add(date);
-          }
-          entries.forEach((item) => {
+        for (const monthKey of Object.keys(data)) {
+          const daysObj = data[monthKey];
+          for (const dayKey of Object.keys(daysObj)) {
+            const item = daysObj[dayKey];
             scheduleList.push({
-              date,
+              date: dayKey, // ✅ 이제는 "2025-07-17"이 됨
               text: item.text || "",
             });
-          });
+            uniqueDates.add(dayKey); // ✅ 마크도 이걸 기준으로!
+          }
         }
+
 
         setMarkedDates(Array.from(uniqueDates));
         setSchedules(scheduleList);
@@ -85,30 +85,34 @@ const Manager_Schedule = () => {
       return;
     }
 
-    const dateKey = `${year}-${month}-${day}`;
+    const monthKey = `${year}-${month}`;   
+    const dayKey = `${year}-${month}-${day}`; 
 
     const scheduleData = {
-      date: dateKey,
+      date: `${year}-${month}-${day}`,
       text: schedule.trim(),
       createdAt: new Date().toISOString(),
       uid: uid,
     };
 
-    push(ref(db, `managerSchedules/${dateKey}`), scheduleData)
-      .then(() => {
-        alert("일정이 저장되었습니다!");
-        setOpen(false);
-        setYear("");
-        setMonth("");
-        setDay("");
-        setSchedule("");
-        setMarkedDates((prev) => [...new Set([...prev, dateKey])]);
-        setSchedules((prev) => [...prev, { date: dateKey, text: schedule.trim() }]);
-      })
-      .catch((error) => {
-        console.error("일정 저장 오류:", error);
-        alert("일정 저장에 실패했습니다.");
-      });
+    set(ref(db, `managerSchedules/${monthKey}/${dayKey}`), scheduleData)
+    .then(() => {
+      alert("일정이 저장되었습니다!");
+      setOpen(false);
+      setYear("");
+      setMonth("");
+      setDay("");
+      setSchedule("");
+
+      const fullDate = `${year}-${month}-${day}`;
+
+      setMarkedDates((prev) => [...new Set([...prev, fullDate])]);
+      setSchedules((prev) => [...prev, { date: fullDate, text: schedule.trim() }]);
+    })
+    .catch((error) => {
+      console.error("일정 저장 오류:", error);
+      alert("일정 저장에 실패했습니다.");
+    });
   };
 
   return (
