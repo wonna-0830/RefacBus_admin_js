@@ -2,24 +2,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
+import {List, Box} from '@mui/material';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
-import UserIcon from '@mui/icons-material/Home';
+import UserIcon from '@mui/icons-material/RouteOutlined';
 import PlaceTimeIcon from '@mui/icons-material/People';
 import ReservationsIcon from '@mui/icons-material/DirectionsBus';
 import DriveNoteIcon from '@mui/icons-material/EventNote';
 import ManagerIcon from '@mui/icons-material/AdminPanelSettings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom"; 
 import { useEffect, useState } from 'react';
 import { ref, get } from "firebase/database";
 import { auth, realtimeDb } from "../firebase";
+import VerifiedUser from '@mui/icons-material/PersonOutline';
 
 const drawerWidth = 240;
 
@@ -39,20 +40,19 @@ const Sidebar = ({ onMenuSelect }) => {
 
   const [adminName, setAdminName] = useState('');
 
-useEffect(() => {
-  const fetchAdminName = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const snapshot = await get(ref(realtimeDb, `admin/${user.uid}`));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setAdminName(data.name);
+        }
+      }
+    });
 
-    const snapshot = await get(ref(realtimeDb, `admin/${uid}`));
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      setAdminName(data.name);
-    }
-  };
-
-  fetchAdminName();
-}, []);
+    return () => unsubscribe(); 
+  }, []);
 
 
   return (
@@ -63,7 +63,7 @@ useEffect(() => {
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
-          backgroundColor: '#002857', // 대구가톨릭대 메인 컬러(임시)
+          backgroundColor: '#002857', 
           color: 'white',
         },
       }}
@@ -84,11 +84,11 @@ useEffect(() => {
       <Divider sx={{ backgroundColor: '#ffffff33' }} />
       <List>
         <ListItemButton  onClick={() => onMenuSelect('user')}>
-          <ListItemIcon sx={{ color: 'white' }}><UserIcon /></ListItemIcon>
+          <ListItemIcon sx={{ color: 'white' }}><PlaceTimeIcon /></ListItemIcon>
           <ListItemText primary="회원 관리" />
         </ListItemButton>
         <ListItemButton onClick={() => onMenuSelect('placetime')}>
-          <ListItemIcon sx={{ color: 'white' }}><PlaceTimeIcon /></ListItemIcon>
+          <ListItemIcon sx={{ color: 'white' }}><UserIcon /></ListItemIcon>
           <ListItemText primary="노선/시간 관리" />
         </ListItemButton>
         <ListItemButton onClick={() => onMenuSelect('reservation')}>
@@ -110,12 +110,12 @@ useEffect(() => {
           <ListItemIcon sx={{ color: 'white' }}><LogoutIcon /></ListItemIcon>
           <ListItemText primary="로그아웃" />
         </ListItemButton>
-        <Typography 
-          variant="body2" 
-          sx={{ color: 'white', ml: 2, mt: 1 }}
-        >
-          관리자: {adminName || "불러오는 중..."}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', color: 'white', ml: 2, mt: 35 }}>
+          <VerifiedUser sx={{ fontSize: 25, mr: 2 }} />
+          <Typography variant="body2">
+            관리자: {adminName || "불러오는 중..."}
+          </Typography>
+        </Box>
       </List>
     </Drawer>
   );
