@@ -51,7 +51,8 @@ function Home() {
 
       {/* ✅ 사이드바 (고정된 폭) */}
       <Box sx={{ width: 200 }}>
-        <Sidebar onMenuSelect={setSelectedMenu} />
+        <Sidebar onMenuSelect={setSelectedMenu} selectedMenu={selectedMenu} />
+
       </Box>
 
       {/* ✅ 메인 컨텐츠 영역 (나머지 전부 차지) */}
