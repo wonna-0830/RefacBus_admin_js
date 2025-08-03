@@ -71,49 +71,55 @@ const Dashboard = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <Box sx={{ display: "flex", gap: 3 }}>
       
-      {/* 공지사항 위쪽 배치 */}
-      <NoticeList notices={notices} />
+      {/* 왼쪽: 캘린더 + 일정목록 세로 배치 */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <SharedCalendar
+          value={value}
+          onChange={setValue}
+          markedDates={markedDates}
+          onMonthChange={handleMonthChange}
+        />
 
-      {/* 캘린더 + 일정 목록을 가로로 붙이기 */}
-      <Box sx={{ display: "flex", height: 400, boxShadow: 3 }}>
-        {/* 캘린더 */}
-        <Box sx={{ borderRight: "1px solid #ccc", p: 2 }}>
-          <SharedCalendar
-            value={value}
-            onChange={setValue}
-            markedDates={markedDates}
-            onMonthChange={handleMonthChange}
-          />
-        </Box>
-
-        {/* 일정 목록 */}
-        <Box sx={{ width: 500, p: 2, overflowY: "auto" }}>
+        <Paper sx={{ width: 500, height: 400, p: 2, borderRadius: 2, overflowY: "auto" }}>
           <Typography variant="h6" gutterBottom>
             📅 {dayjs(value).format("YYYY년 MM월")} 일정 목록
           </Typography>
+
           {scheduleList.length === 0 ? (
             <Typography variant="body2" sx={{ mt: 2 }}>
               해당 월의 일정이 없습니다.
             </Typography>
           ) : (
-            <List>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr", // ✅ 2단 구조
+                gap: 2,
+              }}
+            >
               {scheduleList
                 .filter((s) => s.date.startsWith(currentMonth))
                 .map((s, i) => (
-                  <Box key={i} sx={{ mb: 1 }}>
-                    <strong>{s.date}</strong>
-                    <br />
-                    {s.text}
+                  <Box key={i}>
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {s.date}
+                    </Typography>
+                    <Typography variant="body2">{s.text}</Typography>
                   </Box>
-              ))}
-            </List>
+                ))}
+            </Box>
           )}
-        </Box>
+        </Paper>
+
       </Box>
+
+      {/* 오른쪽: 공지사항 */}
+      <NoticeList notices={notices} />
     </Box>
   );
+
 
 };
 

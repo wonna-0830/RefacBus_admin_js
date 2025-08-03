@@ -24,7 +24,7 @@ import VerifiedUser from '@mui/icons-material/PersonOutline';
 
 const drawerWidth = 240;
 
-const Sidebar = ({ onMenuSelect }) => {
+const Sidebar = ({ onMenuSelect, selectedMenu }) => {
 
   const navigate = useNavigate();
 
@@ -37,6 +37,13 @@ const Sidebar = ({ onMenuSelect }) => {
       alert("로그아웃에 실패했습니다.");
     }
   };
+  
+  const menuButtonStyle = (isSelected) => ({
+    backgroundColor: isSelected ? '#0059b3 !important' : 'transparent',
+    '&:hover': {
+      backgroundColor: '#0073e6',
+    },
+  });
 
   const [adminName, setAdminName] = useState('');
 
@@ -83,26 +90,46 @@ const Sidebar = ({ onMenuSelect }) => {
       </Toolbar>
       <Divider sx={{ backgroundColor: '#ffffff33' }} />
       <List>
-        <ListItemButton  onClick={() => onMenuSelect('user')}>
+        <ListItemButton 
+          selected={selectedMenu === 'user'}
+          onClick={() => onMenuSelect('user')}
+          sx={menuButtonStyle(selectedMenu === 'user')}>
           <ListItemIcon sx={{ color: 'white' }}><PlaceTimeIcon /></ListItemIcon>
           <ListItemText primary="회원 관리" />
         </ListItemButton>
-        <ListItemButton onClick={() => onMenuSelect('placetime')}>
+
+        <ListItemButton 
+          selected={selectedMenu === 'placetime'}
+          onClick={() => onMenuSelect('placetime')}
+          sx={menuButtonStyle(selectedMenu === 'placetime')}>
           <ListItemIcon sx={{ color: 'white' }}><UserIcon /></ListItemIcon>
           <ListItemText primary="노선/시간 관리" />
         </ListItemButton>
-        <ListItemButton onClick={() => onMenuSelect('reservation')}>
+
+        <ListItemButton 
+          selected={selectedMenu === 'reservation'}
+          onClick={() => onMenuSelect('reservation')}
+          sx={menuButtonStyle(selectedMenu === 'reservation')}>
           <ListItemIcon sx={{ color: 'white' }}><ReservationsIcon /></ListItemIcon>
           <ListItemText primary="예약 현황/통계" />
         </ListItemButton>
-        <ListItemButton onClick={() => onMenuSelect('drivenote')}>
+
+        <ListItemButton 
+          selected={selectedMenu === 'drivenote'}
+          onClick={() => onMenuSelect('drivenote')}
+          sx={menuButtonStyle(selectedMenu === 'drivenote')}>
           <ListItemIcon sx={{ color: 'white' }}><DriveNoteIcon /></ListItemIcon>
           <ListItemText primary="운행 기록 확인" />
         </ListItemButton>
-        <ListItemButton onClick={() => onMenuSelect('managermanage')}>
+
+        <ListItemButton 
+          selected={selectedMenu === 'managermanage'}
+          onClick={() => onMenuSelect('managermanage')}
+          sx={menuButtonStyle(selectedMenu === 'managermanage')}>
           <ListItemIcon sx={{ color: 'white' }}><ManagerIcon /></ListItemIcon>
           <ListItemText primary="관리자 계정 관리" />
         </ListItemButton>
+
       </List>
       <Divider sx={{ backgroundColor: '#ffffff33' }} />
       <List>
