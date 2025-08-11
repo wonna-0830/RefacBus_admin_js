@@ -60,12 +60,22 @@ src/
 
 ## 설치 및 실행 방법
 
-# 1. 프로젝트 클론
-git clone https://github.com/username/project.git
+- 1. 프로젝트 클론
+`git clone https://github.com/username/project.git`
 
-# 2. 패키지 설치
-npm install
+- 2. 패키지 설치
+`npm install`
 
-# 3. 개발 서버 실행
-npm run dev
+- 3. 개발 서버 실행
+`npm run dev`
+
+- 데모 계정
+  - 슈퍼관리자: wjddnjs0830, opop8520
+  - 기본관리자: SonDongYeol, opop8520 또는 ChoiDongWon, opop8520
+ 
+---
+
+## 주요 페이지별 스크린샷
+
+- 
 
