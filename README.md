@@ -48,10 +48,10 @@
 ---
 
 ## 프로젝트 구조
-
+```
 src/
-├── components/ 각 페이지에 필요한 컴포넌트
-├── pages/ 주요 페이지
-├── utils/ 색상유닛과 권한 제어 유틸
-└── context/ 관리자 권한 제어를 위한 기능
-
+├── components/ 
+├── pages/ 
+├── utils/ 
+└── context/ 
+```
