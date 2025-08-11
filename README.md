@@ -60,13 +60,13 @@ src/
 
 ## 설치 및 실행 방법
 
-- 1. 프로젝트 클론
+- 프로젝트 클론
 `git clone https://github.com/username/project.git`
 
-- 2. 패키지 설치
+- 패키지 설치
 `npm install`
 
-- 3. 개발 서버 실행
+- 개발 서버 실행
 `npm run dev`
 
 - 데모 계정
