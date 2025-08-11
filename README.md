@@ -89,27 +89,22 @@ src/
 - 회원들 중 학생회원을 관리하는 기능입니다.
 - 가입한 학생들의 UID, 아이디(이메일), 이름, 가입날짜, 경고 횟수, 정지 여부와 함께 서브 기능으로 회원관리가 가능하도록 했습니다.
 <a href="https://github.com/wonna-0830/UserManagement">
-  <img src="images/홈.jpg" width="180">
+  <img src="images/홈.jpg" width="1800">
 </a>
-#### 회원관리 메뉴
-<img width="180" alt="회원관리 메뉴" src="https://github.com/user-attachments/assets/82cababf-14c8-4518-a3ce-56e684d6a505" />
 
-#### 정지 해제
--클릭 시 Firebase 내 데이터베이스에 isBanned가 true가 되면서 앱에서 로그인이 불가능해집니다.
-<img width="351" height="773" alt="계정 정지" src="https://github.com/user-attachments/assets/19263a27-4e55-4d0f-8e6d-ad8f25e7facd" />
-<img width="366" height="367" alt="계정정지 디비" src="https://github.com/user-attachments/assets/61e91e4e-5237-4ee3-9d61-71a55e9cd9f2" />
+- [**회원관리 메뉴**](<img width="180" alt="회원관리 메뉴" src="https://github.com/user-attachments/assets/82cababf-14c8-4518-a3ce-56e684d6a505" />)
 
-#### 비밀번호 초기화
-<img width="180" alt="비밀번호 초기화" src="https://github.com/user-attachments/assets/d2dc7a46-7842-4196-ad4f-42a849edf612" />
+- [**정지 해제**](<img width="351" height="773" alt="계정 정지" src="https://github.com/user-attachments/assets/19263a27-4e55-4d0f-8e6d-ad8f25e7facd" />)
+  -클릭 시 Firebase 내 데이터베이스에 isBanned가 true가 되면서 앱에서 로그인이 불가능해집니다.
+  - [데이터베이스 보기](<img width="366" height="367" alt="계정정지 디비" src="https://github.com/user-attachments/assets/61e91e4e-5237-4ee3-9d61-71a55e9cd9f2" />)
 
-#### 회원 정보 수정
-<img width="180" alt="회원정보수정" src="https://github.com/user-attachments/assets/0fa9bf77-bc0b-4dc3-a0b6-b5dfb0ff5865" />
+- [**비밀번호 초기화**](<img width="180" alt="비밀번호 초기화" src="https://github.com/user-attachments/assets/d2dc7a46-7842-4196-ad4f-42a849edf612" />)
 
-#### 회원 메모 이력
-<img width="180" alt="회원 메모 이력" src="https://github.com/user-attachments/assets/c1e5c9c3-1949-4c01-9e33-70d27f8e25d5" />
+- [**회원 정보 수정**](<img width="180" alt="회원정보수정" src="https://github.com/user-attachments/assets/0fa9bf77-bc0b-4dc3-a0b6-b5dfb0ff5865" />)
 
-#### 회원 메모 추가
-<img width="180" alt="회원 메모 추가" src="https://github.com/user-attachments/assets/e601c8f4-1a3a-4688-8041-25016f6c0946" />
+-[** 회원 메모 이력**](<img width="180" alt="회원 메모 이력" src="https://github.com/user-attachments/assets/c1e5c9c3-1949-4c01-9e33-70d27f8e25d5" />)
+
+- [**회원 메모 추가**](<img width="180" alt="회원 메모 추가" src="https://github.com/user-attachments/assets/e601c8f4-1a3a-4688-8041-25016f6c0946" />)
 
 
 
