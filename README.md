@@ -50,8 +50,22 @@
 ## 프로젝트 구조
 ```
 src/
-├── components/ 
-├── pages/ 
-├── utils/ 
-└── context/ 
+├── components/ 각 페이지 별 폴더 내에 관련 컴포넌트들이 존재
+├── pages/ 주요 페이지
+├── utils/ 색상 유닛과 권한 제어 관련 유틸
+└── context/ 관리자 권한을 위한 컨텍스트
 ```
+
+---
+
+## 설치 및 실행 방법
+
+# 1. 프로젝트 클론
+git clone https://github.com/username/project.git
+
+# 2. 패키지 설치
+npm install
+
+# 3. 개발 서버 실행
+npm run dev
+
