@@ -92,20 +92,84 @@ src/
   <img src="images/회원관리.PNG" width="1800">
 </a>
 
+### 3. 노선/시간 관리
+- 스쿨버스의 노선, 시간, 정류장 별로 관리하는 기능입니다.
+- 등록, 추가, 삭제, 수정이 가능합니다.
 
-- [**회원관리 메뉴**](<img src="images/회원관리 메뉴.PNG"/>)
+#### 노선 추가
+<a href="https://github.com/wonna-0830/RouteTimeManagement">
+  <img src="images/노선시간관리.PNG" width="1800">
+</a>
 
-- [**정지 해제**](<img src="images/계정 정지.PNG"/>) [데이터베이스](<img src="images/계정정지 디비.PNG"/>)
-  -클릭 시 Firebase 내 데이터베이스에 isBanned가 true가 되면서 앱에서 로그인이 불가능해집니다.
+#### 시간 추가
+<a href="https://github.com/wonna-0830/RouteTimeManagement1">
+  <img src="images/노선시간관리 시간대.PNG" width="1800">
+</a>
 
-- [**비밀번호 초기화**](<img src="images/비밀번호 초기화.PNG"/>)
+#### 정류장 추가
+<a href="https://github.com/wonna-0830/RouteTimeManagement2">
+  <img src="images/노선시간관리 정류장 아코디언.PNG" width="1800">
+</a>
 
-- [**회원 정보 수정**](<img src="images/회원정보수정.PNG"/>)
+- 각각의 모달들은 images에서 확인해주세요.
 
--[** 회원 메모 이력**](<img src="images/회원 메모 이력.PNG"/>)
+### 4. 예약 현황/통계
+- 학생들이 예약한 예약 정보를 관리하고 통계로 나타내는 기능입니다.
 
-- [**회원 메모 추가**](<img src="images/회원 메모 추가.PNG"/>)
+#### 날짜별 예약자 목록
+- 날짜별, 날짜+이름별로 예약 목록을 검색할 수 있습니다.
+<a href="https://github.com/wonna-0830/ReservationManagement">
+  <img src="images/날짜별 예약.PNG" width="1800">
+  <img src="images/날짜+이름별 예약.PNG" width="1800">
+</a>
 
+#### 예약 통계
+- 전체 노선 누적 예약, 날짜별 노선 예약, 노선별 정류장 예약, 노선별 시간대 예약을 통계로 나타냈습니다.
+<a href="https://github.com/wonna-0830/ReservationManagement1">
+  <img src="images/예약 통계.PNG" width="1800">
+</a>
 
+#### 예약 취소 통계
+- 전체 취소 노선 수, 날짜별 취소 노선 수, 노선별 취소 시간대, 전체 취소 사유를 통계로 나타냈습니다.
+<a href="https://github.com/wonna-0830/ReservationManagement2">
+  <img src="images/예약취소분석.PNG" width="1800">
+</a>
 
+### 5. 운행 기록 확인
 
+#### 기사별 운행 이력
+- 각 기사들의 운행 이력 확인과, 운행 일정을 추가해 1주일간의 운행 시간표를 볼 수 있습니다.
+<a href="https://github.com/wonna-0830/DriverManagement">
+  <img src="images/운행기록 확인 시간표.PNG" width="1800">
+  <img src="images/운행기록 확인 이력 모달.PNG" width="1800">
+</a>
+
+#### 기사 계정 관리
+- 학생 회원 관리와 동일한 컴포넌트로 기사 회원 관리가 가능합니다.
+<a href="https://github.com/wonna-0830/DriverManagement1">
+  <img src="images/운행기록 확인 기사계정관리.PNG" width="1800">
+</a>
+
+### 6. 관리자 계정 관리
+- 슈퍼관리자가 일반 관리자에게 접근권한을 부여하고, 일정등록과 공지사항을 등록하고 관리하는 기능입니다.
+
+#### 관리자 역할 구분
+- 학생 회원관리와 동일한 컴포넌트로 모든 관리자의 관리가 가능합니다.
+- 기존 회원관리 컴포넌트에 권한 설정 메뉴를 추가해 권한 설정이 가능합니다.
+- 슈퍼관리자인 "박정원" 계정은 권한 설정 메뉴가 없습니다.
+<a href="https://github.com/wonna-0830/ManagerManagement">
+  <img src="images/관리자계정관리메뉴.PNG" width="1800">
+  <img src="images/관리자계정관리 박정원 메뉴.PNG" width="1800">
+</a>
+
+#### 일정 등록 및 관리
+- 전체 노선 누적 예약, 날짜별 노선 예약, 노선별 정류장 예약, 노선별 시간대 예약을 통계로 나타냈습니다.
+<a href="https://github.com/wonna-0830/ReservationManagement1">
+  <img src="images/관리자계정관리 일정등록.PNG" width="1800">
+</a>
+
+#### 공지사항 등록 및 관리
+- 전체 취소 노선 수, 날짜별 취소 노선 수, 노선별 취소 시간대, 전체 취소 사유를 통계로 나타냈습니다.
+<a href="https://github.com/wonna-0830/ReservationManagement2">
+  <img src="images/관리자계정관리 공지사항.PNG" width="1800">
+</a>
